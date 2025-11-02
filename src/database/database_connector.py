@@ -5,8 +5,11 @@ from os.path import join, dirname
 
 # Tìm file .env ở thư mục gốc (cao hơn 2 cấp so với file này)
 dotenv_path = join(dirname(__file__), '..', '..', '.env')
-load_dotenv(dotenv_path)
-
+# Trong tệp database_connector.py
+# Yêu cầu thư viện đọc tệp dưới dạng UTF-16
+load_dotenv(dotenv_path, encoding='utf-16')
+print("Đã tải biến môi trường thành công!")
+print(f"DATABASE_URL là: {os.getenv('db_user')}")
 def get_db_connection():
     """
     Tạo và trả về một kết nối đến CSDL MySQL.
