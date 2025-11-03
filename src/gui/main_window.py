@@ -8,7 +8,7 @@ import os
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
 
-COLOR_PRIMARY = "#20B2AA"
+COLOR_PRIMARY = "#209B95"
 COLOR_BACKGROUND = "#F5F6F8"
 COLOR_TEXT_DARK = "#29313D"
 COLOR_WHITE = "#FFFFFF"
@@ -417,3 +417,4 @@ class DriverPage(ctk.CTkFrame):
 if __name__ == "__main__":
     app = MainWindowApp()
     app.mainloop()
+    #theem mau
