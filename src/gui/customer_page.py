@@ -1,29 +1,35 @@
-# customer_page.py
 import tkinter as tk
 from tkinter import font as tkfont
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.style import Style
 
+# === IMPORT MỚI: TỪ MODEL ===
+try:
+    from models.customer_model import CustomerModel
+except ImportError as e:
+    print(f"Lỗi Import trong customer_page: {e}")
+
 # Định nghĩa màu sắc (cần dùng cho các con số)
 COLOR_PRIMARY_TEAL = "#00A79E"
 
 
 class CustomerPage(ttk.Frame):
-    """Trang Giao diện Quản lý Khách Hàng (với Tabs Filter)"""
+    """Trang Giao diện Quản lý Khách Hàng (Kết nối Database)"""
 
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)
         self.configure(padding=(20, 10))
 
-        # --- LƯU TRỮ DỮ LIỆU GỐC ---
-        self.master_customer_data = [
-            ("KH001", "Nguyễn Thị An", "0901234567", "nt.an@example.com", "150 chuyến", "VIP", "vip"),
-            ("KH002", "Trần Văn Bình", "0912345678", "tv.binh@example.com", "52 chuyến", "Bạc", "bac"),
-            ("KH003", "Lê Văn C", "0923456789", "lv.c@example.com", "5 chuyến", "Đồng", "dong"),
-            ("KH004", "Phạm Thị D", "0934567890", "pt.d@example.com", "88 chuyến", "Bạc", "bac"),
-            ("KH005", "Hoàng Văn E", "0945678901", "hv.e@example.com", "210 chuyến", "VIP", "vip")
-        ]
+        # === KHỞI TẠO MODEL ===
+        try:
+            self.db_model = CustomerModel()
+        except Exception as e:
+            print(f"Không thể khởi tạo CustomerModel: {e}")
+            self.db_model = None
+
+        # --- XÓA DỮ LIỆU MẪU (master_customer_data) ---
+        # (self.master_customer_data đã bị xóa)
 
         # --- 1. Tiêu đề & Nút Thêm Mới ---
         title_frame = ttk.Frame(self, style="TFrame")
@@ -46,23 +52,19 @@ class CustomerPage(ttk.Frame):
         stat_frame = ttk.Frame(self, style="TFrame")
         stat_frame.pack(fill="x", expand=True, pady=10)
 
-        # Thẻ 1: Tổng Số Khách Hàng
+        # (Code của 3 thẻ Card thống kê - Tạm thời giữ số liệu mẫu)
         card1 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card1.pack(side="left", fill="x", expand=True, padx=(0, 10))
         ttk.Label(card1, text="Tổng Số Khách Hàng", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
         ttk.Label(card1, text="1.234", font=("Arial", 22, "bold"),
                   style="light.TLabel", foreground=COLOR_PRIMARY_TEAL).pack(anchor="w", pady=5)
         ttk.Label(card1, text="+160 khách mới tháng này", bootstyle="success").pack(anchor="w")
-
-        # Thẻ 2: Khách Hàng VIP
         card2 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card2.pack(side="left", fill="x", expand=True, padx=10)
         ttk.Label(card2, text="Khách Hàng VIP", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
         ttk.Label(card2, text="50", font=("Arial", 22, "bold"),
                   style="light.TLabel", foreground=COLOR_PRIMARY_TEAL).pack(anchor="w", pady=5)
         ttk.Label(card2, text="Chiếm 4.0% tổng số", bootstyle="info").pack(anchor="w")
-
-        # Thẻ 3: Khách Hàng Bạc
         card3 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card3.pack(side="left", fill="x", expand=True, padx=(10, 0))
         ttk.Label(card3, text="Khách Hàng Bạc", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
@@ -84,7 +86,6 @@ class CustomerPage(ttk.Frame):
         notebook.add(tab_silver, text="  Bạc  ")
         notebook.add(tab_bronze, text="  Đồng  ")
 
-        # === GÁN SỰ KIỆN KHI CHỌN TAB ===
         notebook.bind("<<NotebookTabChanged>>", self.on_tab_selected)
 
         # --- 4. Thanh hành động (Sửa, Xóa, Tìm kiếm) ---
@@ -109,6 +110,7 @@ class CustomerPage(ttk.Frame):
         table_container = ttk.Frame(self, style="TFrame")
         table_container.pack(fill="both", expand=True, pady=10)
 
+        # Các cột này PHẢI KHỚP với câu query SELECT
         columns = ("id", "name", "phone", "email", "trips", "rank")
 
         self.tree = ttk.Treeview(table_container,
@@ -152,7 +154,8 @@ class CustomerPage(ttk.Frame):
         # --- 7. Phân trang (Pagination) ---
         pagination_frame = ttk.Frame(self, style="TFrame")
         pagination_frame.pack(fill="x", pady=(10, 0))
-        ttk.Label(pagination_frame, text="Hiển thị 1 - 5 trong 5", style="secondary.TLabel").pack(side="left")
+        self.pagination_label = ttk.Label(pagination_frame, text="Đang tải...", style="secondary.TLabel")
+        self.pagination_label.pack(side="left")
 
     # --- HÀM MỚI: XỬ LÝ KHI CHỌN TAB ---
     def on_tab_selected(self, event):
@@ -161,6 +164,7 @@ class CustomerPage(ttk.Frame):
 
         self.tree.selection_set()
 
+        # Truyền giá trị Tiếng Việt của CSDL
         if selected_tab_text == "Tất Cả":
             self.load_data_into_tree(filter_status=None)
         elif selected_tab_text == "VIP":
@@ -177,19 +181,45 @@ class CustomerPage(ttk.Frame):
         for item in self.tree.get_children():
             self.tree.delete(item)
 
-        for item in self.master_customer_data:
-            status_tag = item[-1]
-            data_values = item[:-1]
-            status_value = data_values[5]  # Vị trí cột 'rank'
+        if not self.db_model:
+            ttk.Label(self, text="Lỗi: Không thể kết nối Model.", bootstyle="danger").pack()
+            return
 
-            if filter_status is None or status_value == filter_status:
-                self.tree.insert("", "end", text="", values=data_values, tags=(status_tag,))
+        try:
+            # === LẤY DỮ LIỆU TỪ DATABASE ===
+            customer_data = self.db_model.get_all_customers(rank=filter_status)
+        except Exception as e:
+            print(f"Lỗi khi lấy dữ liệu khách hàng: {e}")
+            customer_data = []
+
+        # Tạo map (ánh xạ) từ giá trị trạng thái sang tag
+        tag_map = {
+            "VIP": "vip",
+            "Bạc": "bac",
+            "Đồng": "dong"
+        }
+
+        # Lặp qua DỮ LIỆU TỪ DB và thêm vào bảng
+        count = 0
+        for item in customer_data:
+            # item là một tuple, vd: ('KH001', 'Nguyễn Thị An', ...)
+            data_values = item
+
+            # Lấy giá trị hạng (cột cuối cùng)
+            status_value = item[-1]
+            # Lấy tag màu tương ứng
+            status_tag = tag_map.get(status_value, "")
+
+            self.tree.insert("", "end", text="", values=data_values, tags=(status_tag,))
+            count += 1
+
+        self.pagination_label.config(text=f"Hiển thị {count} trong {count} kết quả.")
 
     def on_tree_select(self, event):
         """Kích hoạt nút Sửa/Xóa khi một dòng được chọn."""
         if self.tree.selection():
             self.edit_button.config(state="enabled")
-            self.delete_button.config(state="disabled")
+            self.delete_button.config(state="disabled")  # Thường thì không nên cho xóa KH
         else:
             self.edit_button.config(state="disabled")
             self.delete_button.config(state="disabled")
