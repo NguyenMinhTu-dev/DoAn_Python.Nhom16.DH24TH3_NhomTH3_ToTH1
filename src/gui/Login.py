@@ -1,9 +1,16 @@
 import tkinter as tk
 import ttkbootstrap as ttk
+import sys
+import os
 from ttkbootstrap.constants import *
 from ttkbootstrap.style import Style  # <-- Import Style
 from tkinter import messagebox
 
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
 # Import lớp Application từ file main_window
 # (Đảm bảo tên file là main_window.py)
 try:
@@ -70,7 +77,7 @@ def check_login():
         messagebox.showerror("Đăng nhập thất bại", "Sai tên đăng nhập hoặc mật khẩu.")
 
 # --- Các Widget của Login ---
-ttk.Label(card_frame, text="XANH SM", font=("Arial", 28, "bold"),
+ttk.Label(card_frame, text="ĐĂNG NHẬP", font=("Arial", 28, "bold"),
           foreground=COLOR_PRIMARY).pack(pady=(20, 10))
 ttk.Label(card_frame, text="Đăng nhập để tiếp tục", font=("Arial", 11),
           foreground=COLOR_SUBTEXT).pack(pady=(0, 30))
@@ -80,7 +87,7 @@ ttk.Label(card_frame, text="TÀI KHOẢN", font=("Arial", 10, "bold"),
 username_entry = ttk.Entry(card_frame, font=("Arial", 12), width=35)
 username_entry.pack(fill='x', padx=10, ipady=5)
 
-ttk.Label(card_frame, text="MẬT KHOẢU", font=("Arial", 10, "bold"),
+ttk.Label(card_frame, text="MẬT KHẨU", font=("Arial", 10, "bold"),
           foreground=COLOR_SUBTEXT).pack(anchor='w', padx=10, pady=(20, 0))
 password_entry = ttk.Entry(card_frame, show="*", font=("Arial", 12))
 password_entry.pack(fill='x', padx=10, ipady=5)
