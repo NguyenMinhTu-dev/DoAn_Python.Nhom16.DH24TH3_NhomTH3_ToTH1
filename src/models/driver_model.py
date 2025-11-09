@@ -15,20 +15,20 @@ class DriverModel:
             # Câu query này phải khớp với CSDL tiếng Việt của bạn
             query = """
                 SELECT 
-                    ma_tai_xe, 
-                    ho_ten, 
-                    hang_xe_lai, 
-                    so_bang_lai, 
-                    email, 
-                    so_dien_thoai, 
-                    danh_gia_trung_binh, 
-                    trang_thai 
-                FROM TaiXe
+                    `ma_tai_xe`, 
+                    `ho_ten`, 
+                    `hang_xe_lai`, 
+                    `so_bang_lai`, 
+                    `email`, 
+                    `so_dien_thoai`, 
+                    `danh_gia_trung_binh`, 
+                    `trang_thai` 
+                FROM `TaiXe`
             """
 
             params = []
             if status:
-                query += " WHERE trang_thai = %s"
+                query += " WHERE `trang_thai` = %s"
                 params.append(status)
 
             # fetch_all không cần params nếu params rỗng
@@ -45,4 +45,3 @@ class DriverModel:
                 db.close()
 
     # (Bạn có thể thêm các hàm add_driver, update_driver, delete_driver ở đây)
-
