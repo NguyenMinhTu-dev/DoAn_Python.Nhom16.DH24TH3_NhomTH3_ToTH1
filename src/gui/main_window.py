@@ -101,7 +101,7 @@ class Application(ttk.Frame):
         sidebar = ttk.Frame(self, width=280, style="primary")
         sidebar.pack_propagate(False)
 
-        ttk.Label(sidebar, text="XANH SM",
+        ttk.Label(sidebar, text="Quản Lý",
                   font=("Arial", 22, "bold"),
                   foreground=COLOR_PRIMARY_TEAL,
                   background=COLOR_SIDEBAR_BG).pack(pady=30, padx=20)
