@@ -1,3 +1,4 @@
+# customer_page.py
 import tkinter as tk
 from tkinter import font as tkfont
 import ttkbootstrap as ttk
@@ -110,8 +111,8 @@ class CustomerPage(ttk.Frame):
         table_container = ttk.Frame(self, style="TFrame")
         table_container.pack(fill="both", expand=True, pady=10)
 
-        # Các cột này PHẢI KHỚP với câu query SELECT
-        columns = ("id", "name", "phone", "email", "trips", "rank")
+        # SỬA: Bỏ cột 'trips' (tổng chuyến đi)
+        columns = ("id", "name", "phone", "email", "rank")
 
         self.tree = ttk.Treeview(table_container,
                                  columns=columns,
@@ -124,13 +125,12 @@ class CustomerPage(ttk.Frame):
         self.tree.heading("id", text="Mã Khách Hàng")
         self.tree.column("id", width=100, anchor="center")
         self.tree.heading("name", text="Họ Tên")
-        self.tree.column("name", width=200)
+        self.tree.column("name", width=250)
         self.tree.heading("phone", text="Số Điện Thoại")
         self.tree.column("phone", width=120, anchor="center")
         self.tree.heading("email", text="Email")
-        self.tree.column("email", width=200)
-        self.tree.heading("trips", text="Tổng Chuyến Đi")
-        self.tree.column("trips", width=100, anchor="e")
+        self.tree.column("email", width=250)
+        # SỬA: Xóa cột 'trips'
         self.tree.heading("rank", text="Hạng")
         self.tree.column("rank", width=100, anchor="center")
 
@@ -154,14 +154,16 @@ class CustomerPage(ttk.Frame):
         # --- 7. Phân trang (Pagination) ---
         pagination_frame = ttk.Frame(self, style="TFrame")
         pagination_frame.pack(fill="x", pady=(10, 0))
+
+        # === SỬA LỖI Ở ĐÂY ===
+        # Gán Label cho 'self.pagination_label'
         self.pagination_label = ttk.Label(pagination_frame, text="Đang tải...", style="secondary.TLabel")
         self.pagination_label.pack(side="left")
+        # =======================
 
-    # --- HÀM MỚI: XỬ LÝ KHI CHỌN TAB ---
     def on_tab_selected(self, event):
         """Được gọi khi người dùng nhấp vào một tab"""
         selected_tab_text = event.widget.tab(event.widget.select(), "text").strip()
-
         self.tree.selection_set()
 
         # Truyền giá trị Tiếng Việt của CSDL
@@ -174,7 +176,6 @@ class CustomerPage(ttk.Frame):
         elif selected_tab_text == "Đồng":
             self.load_data_into_tree(filter_status="Đồng")
 
-    # --- HÀM MỚI: TẢI DỮ LIỆU CÓ LỌC ---
     def load_data_into_tree(self, filter_status=None):
         """Xóa bảng và tải lại dữ liệu dựa trên trạng thái lọc"""
 
@@ -213,7 +214,10 @@ class CustomerPage(ttk.Frame):
             self.tree.insert("", "end", text="", values=data_values, tags=(status_tag,))
             count += 1
 
-        self.pagination_label.config(text=f"Hiển thị {count} trong {count} kết quả.")
+        pagination_frame = ttk.Frame(self, style="TFrame")
+        pagination_frame.pack(fill="x", pady=(10, 0))
+        # Dòng này giờ sẽ chạy được
+        ttk.Label(pagination_frame, text="Đang tải...", style="secondary.TLabel").pack(side="left")
 
     def on_tree_select(self, event):
         """Kích hoạt nút Sửa/Xóa khi một dòng được chọn."""
