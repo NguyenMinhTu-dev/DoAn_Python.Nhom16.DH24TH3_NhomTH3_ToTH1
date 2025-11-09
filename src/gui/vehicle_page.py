@@ -28,9 +28,6 @@ class VehiclePage(ttk.Frame):
             print(f"Không thể khởi tạo VehicleModel: {e}")
             self.db_model = None
 
-        # --- XÓA DỮ LIỆU MẪU (master_vehicle_data) ---
-        # (self.master_vehicle_data đã bị xóa)
-
         # --- 1. Tiêu đề & Nút Thêm Mới ---
         title_frame = ttk.Frame(self, style="TFrame")
         title_frame.pack(fill="x", anchor="n", pady=(0, 10))
@@ -125,8 +122,8 @@ class VehiclePage(ttk.Frame):
         self.tree.column("plate", width=120, anchor="center")
         self.tree.heading("type", text="Loại Xe")
         self.tree.column("type", width=150)
-        self.tree.heading("driver_name", text="Tài Xế Phụ Trách")  # Đổi tên
-        self.tree.column("driver_name", width=200)  # Đổi tên
+        self.tree.heading("driver_name", text="Tài Xế Phụ Trách")
+        self.tree.column("driver_name", width=200)
         self.tree.heading("mileage", text="Số Km")
         self.tree.column("mileage", width=100, anchor="e")
         self.tree.heading("last_maintenance", text="Bảo Trì Lần Cuối")
@@ -141,7 +138,7 @@ class VehiclePage(ttk.Frame):
 
         self.tree.tag_configure('hoatdong', foreground='#28a745')
         self.tree.tag_configure('baotri', foreground='#fd7e14')
-        self.tree.tag_configure('ngung', foreground='#dc3545')  # Thêm màu đỏ
+        self.tree.tag_configure('ngung', foreground='#dc3545')
 
         self.tree.bind("<<TreeviewSelect>>", self.on_tree_select)
         self.bind("<Button-1>", self.deselect_tree)
@@ -160,14 +157,9 @@ class VehiclePage(ttk.Frame):
         self.pagination_label.pack(side="left")
         # =======================
 
-    # --- HÀM MỚI: XỬ LÝ KHI CHỌN TAB ---
     def on_tab_selected(self, event):
-        """Được gọi khi người dùng nhấp vào một tab"""
         selected_tab_text = event.widget.tab(event.widget.select(), "text").strip()
-
-        self.tree.selection_set()  # Bỏ chọn
-
-        # Truyền giá trị Tiếng Việt của CSDL
+        self.tree.selection_set()
         if selected_tab_text == "Tất Cả":
             self.load_data_into_tree(filter_status=None)
         elif selected_tab_text == "Đang Hoạt Động":
@@ -177,10 +169,7 @@ class VehiclePage(ttk.Frame):
         elif selected_tab_text == "Ngừng Hoạt Động":
             self.load_data_into_tree(filter_status="Ngừng hoạt động")
 
-    # --- HÀM MỚI: TẢI DỮ LIỆU CÓ LỌC ---
     def load_data_into_tree(self, filter_status=None):
-        """Xóa bảng và tải lại dữ liệu dựa trên trạng thái lọc"""
-
         for item in self.tree.get_children():
             self.tree.delete(item)
 
@@ -189,37 +178,30 @@ class VehiclePage(ttk.Frame):
             return
 
         try:
-            # === LẤY DỮ LIỆU TỪ DATABASE ===
             vehicle_data = self.db_model.get_all_vehicles(status=filter_status)
         except Exception as e:
             print(f"Lỗi khi lấy dữ liệu phương tiện: {e}")
             vehicle_data = []
 
-        # Tạo map (ánh xạ) từ giá trị trạng thái sang tag
         tag_map = {
             "Hoạt động": "hoatdong",
             "Bảo trì": "baotri",
             "Ngừng hoạt động": "ngung"
         }
 
-        # Lặp qua DỮ LIỆU TỪ DB và thêm vào bảng
         count = 0
         for item in vehicle_data:
-            # item là một tuple, vd: ('51F-123.45', 'VinFast VF 8', 'Nguyễn Văn An', ...)
             data_values = item
-
-            # Lấy giá trị trạng thái (cột cuối cùng)
             status_value = item[-1]
-            # Lấy tag màu tương ứng
             status_tag = tag_map.get(status_value, "")
-
             self.tree.insert("", "end", text="", values=data_values, tags=(status_tag,))
             count += 1
-
-        self.pagination_label.config(text=f"Hiển thị {count} trong {count} kết quả.")
+        pagination_frame = ttk.Frame(self, style="TFrame")
+        pagination_frame.pack(fill="x", pady=(10, 0))
+        # Dòng này giờ sẽ chạy được
+        ttk.Label(pagination_frame, text="Đang tải...", style="secondary.TLabel").pack(side="left")
 
     def on_tree_select(self, event):
-        """Kích hoạt nút Sửa/Xóa khi một dòng được chọn."""
         if self.tree.selection():
             self.edit_button.config(state="enabled")
             self.delete_button.config(state="enabled")
@@ -227,7 +209,6 @@ class VehiclePage(ttk.Frame):
             self.edit_button.config(state="disabled")
 
     def deselect_tree(self, event):
-        """Bỏ chọn tất cả các dòng khi nhấp ra ngoài."""
         if not self.tree.identify_region(event.x, event.y) == "heading":
             if not self.tree.focus():
                 self.tree.selection_set()
