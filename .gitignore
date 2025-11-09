@@ -1,0 +1,12 @@
+Môi trường ảo
+
+.venv/
+
+File bí mật
+
+.env
+
+File cache của Python
+
+pycache/
+*.pyc
