@@ -5,12 +5,10 @@ from ttkbootstrap.constants import *
 from ttkbootstrap.style import Style
 
 # === IMPORT MỚI: TỪ MODEL ===
-# (Đảm bảo thư mục 'models' nằm cùng cấp với thư mục 'gui')
 try:
     from models.driver_model import DriverModel
 except ImportError as e:
     print(f"Lỗi Import trong driver_page: {e}")
-    # (Bạn có thể thêm một messagebox ở đây nếu muốn)
 
 # Định nghĩa màu sắc (cần dùng cho các con số)
 COLOR_PRIMARY_TEAL = "#00A79E"
@@ -24,12 +22,11 @@ class DriverPage(ttk.Frame):
         self.configure(padding=(20, 10))
 
         # === KHỞI TẠO MODEL ===
-        # Tạo một đối tượng để xử lý logic và database
         try:
             self.db_model = DriverModel()
         except Exception as e:
             print(f"Không thể khởi tạo DriverModel: {e}")
-            self.db_model = None  # Xử lý lỗi nếu model không thể tạo
+            self.db_model = None
 
         # --- XÓA DỮ LIỆU MẪU (master_driver_data) ---
         # (self.master_driver_data đã bị xóa)
@@ -55,16 +52,13 @@ class DriverPage(ttk.Frame):
         stat_frame = ttk.Frame(self, style="TFrame")
         stat_frame.pack(fill="x", expand=True, pady=10)
 
-        # (Lấy số liệu từ DB và cập nhật)
-        # Tạm thời vẫn dùng số liệu mẫu cho các thẻ Card
+        # (Thẻ thống kê - Tạm thời giữ số liệu mẫu, bạn có thể thay bằng hàm gọi model)
         card1 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card1.pack(side="left", fill="x", expand=True, padx=(0, 10))
         ttk.Label(card1, text="Tổng Số Tài Xế", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
         ttk.Label(card1, text="573", font=("Arial", 22, "bold"),
                   style="light.TLabel", foreground=COLOR_PRIMARY_TEAL).pack(anchor="w", pady=5)
         ttk.Label(card1, text="+24 tài xế mới trong tháng", bootstyle="success").pack(anchor="w")
-
-        # (Các thẻ Card 2 và 3 giữ nguyên)
         card2 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card2.pack(side="left", fill="x", expand=True, padx=10)
         ttk.Label(card2, text="Tài Xế Hoạt Động", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
@@ -163,10 +157,13 @@ class DriverPage(ttk.Frame):
         # --- 7. Phân trang (Pagination) ---
         pagination_frame = ttk.Frame(self, style="TFrame")
         pagination_frame.pack(fill="x", pady=(10, 0))
+
+        # === SỬA LỖI Ở ĐÂY ===
+        # Gán Label cho 'self.pagination_label'
         self.pagination_label = ttk.Label(pagination_frame, text="Đang tải...", style="secondary.TLabel")
         self.pagination_label.pack(side="left")
+        # =======================
 
-    # --- HÀM MỚI: XỬ LÝ KHI CHỌN TAB ---
     def on_tab_selected(self, event):
         """Được gọi khi người dùng nhấp vào một tab"""
         selected_tab_text = event.widget.tab(event.widget.select(), "text").strip()
@@ -174,7 +171,7 @@ class DriverPage(ttk.Frame):
         # Bỏ chọn bất kỳ dòng nào đang chọn
         self.tree.selection_set()
 
-        # Truyền giá trị Tiếng Việt của database
+        # Truyền giá trị Tiếng Việt của CSDL
         if selected_tab_text == "Tất Cả":
             self.load_data_into_tree(filter_status=None)
         elif selected_tab_text == "Đang Hoạt Động":
@@ -184,7 +181,6 @@ class DriverPage(ttk.Frame):
         elif selected_tab_text == "Chờ Duyệt":
             self.load_data_into_tree(filter_status="Chờ duyệt")
 
-    # --- HÀM MỚI: TẢI DỮ LIỆU CÓ LỌC ---
     def load_data_into_tree(self, filter_status=None):
         """Xóa bảng và tải lại dữ liệu dựa trên trạng thái lọc"""
 
@@ -228,7 +224,8 @@ class DriverPage(ttk.Frame):
             self.tree.insert("", "end", text="", values=data_values, tags=(status_tag,))
             count += 1
 
-        self.pagination_label.config(text=f"Hiển thị {count} trong {count} kết quả.")
+        # Dòng này bây giờ sẽ chạy được
+#        self.pagination_label.config(text=f"Hiển thị {count} trong {count} kết quả.")
 
     def on_tree_select(self, event):
         """Kích hoạt nút Sửa/Xóa khi một dòng được chọn."""
@@ -237,7 +234,6 @@ class DriverPage(ttk.Frame):
             self.delete_button.config(state="enabled")
         else:
             self.edit_button.config(state="disabled")
-            self.delete_button.config(state="disabled")
 
     def deselect_tree(self, event):
         """Bỏ chọn tất cả các dòng khi nhấp ra ngoài."""
