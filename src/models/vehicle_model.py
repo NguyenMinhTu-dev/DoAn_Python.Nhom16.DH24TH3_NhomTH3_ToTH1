@@ -45,3 +45,5 @@ class VehicleModel:
         finally:
             if db:
                 db.close()
+
+    # (Bạn có thể thêm các hàm add_vehicle, update_vehicle, delete_vehicle ở đây)
