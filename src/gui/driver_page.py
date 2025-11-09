@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import font as tkfont
+from  tkinter import messagebox
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.style import Style
@@ -45,8 +46,10 @@ class DriverPage(ttk.Frame):
                   style="secondary.TLabel").pack(anchor="w")
 
         add_button = ttk.Button(title_frame, text="Thêm Tài Xế",
-                                bootstyle="success")
+                                bootstyle="success",
+                                command= self.open_add_driver_modal)
         add_button.pack(side="right", anchor="ne", pady=10)
+
 
         # --- 2. Hàng Thống Kê ---
         stat_frame = ttk.Frame(self, style="TFrame")
@@ -94,12 +97,14 @@ class DriverPage(ttk.Frame):
 
         self.edit_button = ttk.Button(action_bar, text="Sửa",
                                       bootstyle="outline-warning",
-                                      state="disabled")
+                                      state="disabled",
+                                      command= self.open_edit_driver_modal)
         self.edit_button.pack(side="left", padx=(0, 5))
 
         self.delete_button = ttk.Button(action_bar, text="Xóa",
                                         bootstyle="outline-danger",
-                                        state="disabled")
+                                        state="disabled",
+                                        command= self.delete_selected_driver)
         self.delete_button.pack(side="left", padx=5)
 
         search_entry = ttk.Entry(action_bar, width=50)
@@ -163,6 +168,39 @@ class DriverPage(ttk.Frame):
         self.pagination_label = ttk.Label(pagination_frame, text="Đang tải...", style="secondary.TLabel")
         self.pagination_label.pack(side="left")
         # =======================
+    def open_add_driver_modal(self):
+                if self.db_model:
+                    AddDriverModal(self, self.db_model, callback=lambda: self.load_data_into_tree())
+                else:
+                    print("Lỗi: Không thể mở form thêm tài xế vì Model chưa kết nối.")
+
+    def delete_selected_driver(self):
+        selected = self.tree.selection()
+        if not selected:
+            return
+
+        item = self.tree.item(selected[0])
+        driver_code = item['values'][0]
+
+        if messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn xóa tài xế {driver_code}?"):
+            success = self.db_model.delete_driver(driver_code)
+            if success:
+                messagebox.showinfo("Thành công", "Đã xóa tài xế.")
+                self.load_data_into_tree()
+            else:
+                messagebox.showerror("Lỗi", "Không thể xóa tài xế.")
+
+    def open_edit_driver_modal(self):
+        selected = self.tree.selection()
+        if not selected:
+            return
+
+        item = self.tree.item(selected[0])
+        values = item['values']
+        driver_code = values[0]  # ma_tai_xe
+
+        # Tạo form tương tự AddDriverModal nhưng có dữ liệu sẵn
+        EditDriverModal(self, self.db_model, driver_code, callback=lambda: self.load_data_into_tree())
 
     def on_tab_selected(self, event):
         """Được gọi khi người dùng nhấp vào một tab"""
@@ -240,3 +278,158 @@ class DriverPage(ttk.Frame):
         if not self.tree.identify_region(event.x, event.y) == "heading":
             if not self.tree.focus():
                 self.tree.selection_set()
+
+
+class AddDriverModal(tk.Toplevel):
+    def __init__(self, parent, db_model, callback=None):
+        tk.Toplevel.__init__(self, parent)
+        self.title("Thêm Tài Xế Mới")
+        self.db_model = db_model
+        self.callback = callback
+        self.transient(parent)
+        self.grab_set()
+        self.resizable(False, False)
+
+        main_frame = ttk.Frame(self, padding=30, style='light')
+        main_frame.pack(fill="both", expand=True)
+
+        ttk.Label(main_frame, text="Thêm Tài Xế Mới", font=("Arial", 16, "bold"),
+                  foreground=COLOR_PRIMARY_TEAL).pack(pady=(0, 10))
+        ttk.Label(main_frame, text="Nhập thông tin tài xế mới vào mẫu bên dưới.",
+                  bootstyle="secondary").pack(pady=(0, 20))
+
+        self.create_form_widgets(main_frame)
+
+        button_frame = ttk.Frame(main_frame, style='light')
+        button_frame.pack(fill="x", pady=20)
+
+        ttk.Button(button_frame, text="Lưu", command=self.save_driver, bootstyle="success").pack(side="right")
+        ttk.Button(button_frame, text="Hủy", command=self.destroy, bootstyle="secondary-outline").pack(side="right",
+                                                                                                       padx=10)
+
+    def create_form_widgets(self, parent):
+        form_frame = ttk.Frame(parent, style='light')
+        form_frame.pack(fill="x")
+
+        form_frame.columnconfigure(1, weight=1)
+
+        # 1. Họ Tên
+        ttk.Label(form_frame, text="Họ Tên", font=("Arial", 10, "bold")).grid(row=0, column=0, columnspan=2, sticky="w",
+                                                                              pady=(10, 0))
+        self.name_entry = ttk.Entry(form_frame, font=("Arial", 12))
+        self.name_entry.grid(row=1, column=0, columnspan=2, sticky="ew", padx=(0, 10), ipady=5)
+
+        # 2. Email (Left)
+        ttk.Label(form_frame, text="Email", font=("Arial", 10, "bold")).grid(row=2, column=0, sticky="w", pady=(10, 0))
+        self.email_entry = ttk.Entry(form_frame, font=("Arial", 12))
+        self.email_entry.grid(row=3, column=0, sticky="ew", padx=(0, 10), ipady=5)
+
+        # 3. Số Điện Thoại (Right)
+        ttk.Label(form_frame, text="Số Điện Thoại", font=("Arial", 10, "bold")).grid(row=2, column=1, sticky="w",
+                                                                                     pady=(10, 0))
+        self.phone_entry = ttk.Entry(form_frame, font=("Arial", 12))
+        self.phone_entry.grid(row=3, column=1, sticky="ew", padx=(10, 0), ipady=5)
+
+        # 4. Hạng Xe Lái (Left - Combobox)
+        ttk.Label(form_frame, text="Hạng Xe Lái", font=("Arial", 10, "bold")).grid(row=4, column=0, sticky="w",
+                                                                                   pady=(10, 0))
+        self.vehicle_combo = ttk.Combobox(form_frame, values=["Xe 4 Chỗ", "Xe 7 Chỗ", "Xe Bán Tải"], state="readonly")
+        self.vehicle_combo.set("Xe 4 Chỗ")
+        self.vehicle_combo.grid(row=5, column=0, sticky="ew", padx=(0, 10), ipady=5)
+
+        # 5. Số Bằng Lái (Right)
+        ttk.Label(form_frame, text="Số Bằng Lái", font=("Arial", 10, "bold")).grid(row=4, column=1, sticky="w",
+                                                                                   pady=(10, 0))
+        self.license_entry = ttk.Entry(form_frame, font=("Arial", 12))
+        self.license_entry.grid(row=5, column=1, sticky="ew", padx=(10, 0), ipady=5)
+
+        # 6. Trạng Thái (Full width)
+        ttk.Label(form_frame, text="Trạng Thái", font=("Arial", 10, "bold")).grid(row=6, column=0, columnspan=2,
+                                                                                  sticky="w", pady=(10, 0))
+        self.status_combo = ttk.Combobox(form_frame, values=["Hoạt động", "Tạm ngưng", "Chờ duyệt"], state="readonly")
+        self.status_combo.set("Chờ duyệt")
+        self.status_combo.grid(row=7, column=0, columnspan=2, sticky="ew", padx=(0, 10), ipady=5)
+
+        form_frame.grid_columnconfigure(0, weight=1)
+        form_frame.grid_columnconfigure(1, weight=1)
+
+
+    def save_driver(self):
+        # 1. Lấy dữ liệu
+        data = {
+            'name': self.name_entry.get(),
+            'email': self.email_entry.get(),
+            'phone': self.phone_entry.get(),
+            'vehicle_category': self.vehicle_combo.get(),
+            'license': self.license_entry.get(),
+            'status': self.status_combo.get()
+        }
+
+        if not all(data.values()):
+            messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ thông tin.")
+            return
+
+        # 2. Gọi hàm thêm trong Model
+        success = self.db_model.add_driver(data)
+
+        if success:
+            messagebox.showinfo("Thành công", "Đã thêm tài xế mới.")
+            self.destroy()
+            if self.callback:
+                self.callback()  # Gọi lại hàm load dữ liệu sau khi thêm
+        else:
+            messagebox.showerror("Lỗi", "Không thể lưu tài xế vào CSDL. Vui lòng kiểm tra lại kết nối và dữ liệu.")
+class EditDriverModal(tk.Toplevel):
+    def __init__(self, parent, db_model, driver_code, callback=None):
+        super().__init__(parent)
+        self.db_model = db_model
+        self.driver_code = driver_code
+        self.callback = callback
+        self.transient(parent)
+        self.grab_set()
+        self.resizable(False, False)
+
+        main_frame = ttk.Frame(self, padding=30, style='light')
+        main_frame.pack(fill="both", expand=True)
+
+        ttk.Label(main_frame, text="Sửa Thông Tin Tài Xế", font=("Arial", 16, "bold"),
+                  foreground="#00A79E").pack(pady=(0, 10))
+
+        # Lấy dữ liệu tài xế
+        data = self.db_model.get_all_drivers()  # hoặc tạo hàm get_driver_by_id
+        driver_data = next((d for d in data if d[0] == driver_code), None)
+
+        self.create_form_widgets(main_frame, driver_data)
+
+        button_frame = ttk.Frame(main_frame, style='light')
+        button_frame.pack(fill="x", pady=20)
+
+        ttk.Button(button_frame, text="Lưu", command=self.save_driver, bootstyle="success").pack(side="right")
+        ttk.Button(button_frame, text="Hủy", command=self.destroy, bootstyle="secondary-outline").pack(side="right", padx=10)
+
+    def create_form_widgets(self, parent, driver_data):
+        # Tương tự AddDriverModal nhưng điền sẵn driver_data vào Entry/Combobox
+        pass  # copy từ AddDriverModal và set giá trị .insert(0, value)
+
+    def save_driver(self):
+        data = {
+            'name': self.name_entry.get(),
+            'email': self.email_entry.get(),
+            'phone': self.phone_entry.get(),
+            'vehicle_category': self.vehicle_combo.get(),
+            'license': self.license_entry.get(),
+            'status': self.status_combo.get()
+        }
+
+        if not all(data.values()):
+            messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ thông tin.")
+            return
+
+        success = self.db_model.update_driver(self.driver_code, data)
+        if success:
+            messagebox.showinfo("Thành công", "Đã cập nhật tài xế.")
+            self.destroy()
+            if self.callback:
+                self.callback()
+        else:
+            messagebox.showerror("Lỗi", "Không thể cập nhật tài xế.")
