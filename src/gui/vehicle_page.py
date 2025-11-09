@@ -1,29 +1,35 @@
-# vehicle_page.py
 import tkinter as tk
 from tkinter import font as tkfont
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.style import Style
 
+# === IMPORT MỚI: TỪ MODEL ===
+try:
+    from models.vehicle_model import VehicleModel
+except ImportError as e:
+    print(f"Lỗi Import trong vehicle_page: {e}")
+
 # Định nghĩa màu sắc (cần dùng cho các con số)
 COLOR_PRIMARY_TEAL = "#00A79E"
 
 
 class VehiclePage(ttk.Frame):
-    """Trang Giao diện Quản lý Phương Tiện (với Tabs Filter)"""
+    """Trang Giao diện Quản lý Phương Tiện (Kết nối Database)"""
 
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)
         self.configure(padding=(20, 10))
 
-        # --- LƯU TRỮ DỮ LIỆU GỐC ---
-        self.master_vehicle_data = [
-            ("51F-123.45", "VinFast VF 8", "Nguyễn Văn A", "120.500 km", "10/10/2025", "Hoạt động", "hoatdong"),
-            ("29A-987.65", "VinFast VF e34", "Trần Thị B", "85.000 km", "01/11/2025", "Hoạt động", "hoatdong"),
-            ("92A-456.78", "VinFast VF 9", "Lê Văn C", "150.200 km", "15/09/2025", "Bảo trì", "baotri"),
-            ("30E-333.33", "VinFast VF 5", "Phạm Thị D", "45.000 km", "20/10/2025", "Hoạt động", "hoatdong"),
-            ("60C-555.55", "VinFast VF 8", "(Chưa gán)", "210.000 km", "01/01/2025", "Ngừng hoạt động", "ngung")
-        ]
+        # === KHỞI TẠO MODEL ===
+        try:
+            self.db_model = VehicleModel()
+        except Exception as e:
+            print(f"Không thể khởi tạo VehicleModel: {e}")
+            self.db_model = None
+
+        # --- XÓA DỮ LIỆU MẪU (master_vehicle_data) ---
+        # (self.master_vehicle_data đã bị xóa)
 
         # --- 1. Tiêu đề & Nút Thêm Mới ---
         title_frame = ttk.Frame(self, style="TFrame")
@@ -46,7 +52,7 @@ class VehiclePage(ttk.Frame):
         stat_frame = ttk.Frame(self, style="TFrame")
         stat_frame.pack(fill="x", expand=True, pady=10)
 
-        # (Code của 3 thẻ Card thống kê...)
+        # (Code của 3 thẻ Card thống kê - Tạm thời giữ số liệu mẫu)
         card1 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card1.pack(side="left", fill="x", expand=True, padx=(0, 10))
         ttk.Label(card1, text="Tổng Số Phương Tiện", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
@@ -80,7 +86,6 @@ class VehiclePage(ttk.Frame):
         notebook.add(tab_maintenance, text="  Bảo Trì  ")
         notebook.add(tab_stopped, text="  Ngừng Hoạt Động  ")
 
-        # === GÁN SỰ KIỆN KHI CHỌN TAB ===
         notebook.bind("<<NotebookTabChanged>>", self.on_tab_selected)
 
         # --- 4. Thanh hành động (Sửa, Xóa, Tìm kiếm) ---
@@ -105,7 +110,8 @@ class VehiclePage(ttk.Frame):
         table_container = ttk.Frame(self, style="TFrame")
         table_container.pack(fill="both", expand=True, pady=10)
 
-        columns = ("plate", "type", "driver", "mileage", "last_maintenance", "status")
+        # Các cột này PHẢI KHỚP với câu query SELECT
+        columns = ("plate", "type", "driver_name", "mileage", "last_maintenance", "status")
 
         self.tree = ttk.Treeview(table_container,
                                  columns=columns,
@@ -119,8 +125,8 @@ class VehiclePage(ttk.Frame):
         self.tree.column("plate", width=120, anchor="center")
         self.tree.heading("type", text="Loại Xe")
         self.tree.column("type", width=150)
-        self.tree.heading("driver", text="Tài Xế Phụ Trách")
-        self.tree.column("driver", width=200)
+        self.tree.heading("driver_name", text="Tài Xế Phụ Trách")  # Đổi tên
+        self.tree.column("driver_name", width=200)  # Đổi tên
         self.tree.heading("mileage", text="Số Km")
         self.tree.column("mileage", width=100, anchor="e")
         self.tree.heading("last_maintenance", text="Bảo Trì Lần Cuối")
@@ -135,7 +141,7 @@ class VehiclePage(ttk.Frame):
 
         self.tree.tag_configure('hoatdong', foreground='#28a745')
         self.tree.tag_configure('baotri', foreground='#fd7e14')
-        self.tree.tag_configure('ngung', foreground='#dc3545')
+        self.tree.tag_configure('ngung', foreground='#dc3545')  # Thêm màu đỏ
 
         self.tree.bind("<<TreeviewSelect>>", self.on_tree_select)
         self.bind("<Button-1>", self.deselect_tree)
@@ -147,15 +153,21 @@ class VehiclePage(ttk.Frame):
         # --- 7. Phân trang (Pagination) ---
         pagination_frame = ttk.Frame(self, style="TFrame")
         pagination_frame.pack(fill="x", pady=(10, 0))
-        ttk.Label(pagination_frame, text="Hiển thị 1 - 5 trong 5", style="secondary.TLabel").pack(side="left")
+
+        # === SỬA LỖI Ở ĐÂY ===
+        # Gán Label cho 'self.pagination_label'
+        self.pagination_label = ttk.Label(pagination_frame, text="Đang tải...", style="secondary.TLabel")
+        self.pagination_label.pack(side="left")
+        # =======================
 
     # --- HÀM MỚI: XỬ LÝ KHI CHỌN TAB ---
     def on_tab_selected(self, event):
         """Được gọi khi người dùng nhấp vào một tab"""
         selected_tab_text = event.widget.tab(event.widget.select(), "text").strip()
 
-        self.tree.selection_set()
+        self.tree.selection_set()  # Bỏ chọn
 
+        # Truyền giá trị Tiếng Việt của CSDL
         if selected_tab_text == "Tất Cả":
             self.load_data_into_tree(filter_status=None)
         elif selected_tab_text == "Đang Hoạt Động":
@@ -172,13 +184,39 @@ class VehiclePage(ttk.Frame):
         for item in self.tree.get_children():
             self.tree.delete(item)
 
-        for item in self.master_vehicle_data:
-            status_tag = item[-1]
-            data_values = item[:-1]
-            status_value = data_values[5]  # Vị trí cột 'status'
+        if not self.db_model:
+            ttk.Label(self, text="Lỗi: Không thể kết nối Model.", bootstyle="danger").pack()
+            return
 
-            if filter_status is None or status_value == filter_status:
-                self.tree.insert("", "end", text="", values=data_values, tags=(status_tag,))
+        try:
+            # === LẤY DỮ LIỆU TỪ DATABASE ===
+            vehicle_data = self.db_model.get_all_vehicles(status=filter_status)
+        except Exception as e:
+            print(f"Lỗi khi lấy dữ liệu phương tiện: {e}")
+            vehicle_data = []
+
+        # Tạo map (ánh xạ) từ giá trị trạng thái sang tag
+        tag_map = {
+            "Hoạt động": "hoatdong",
+            "Bảo trì": "baotri",
+            "Ngừng hoạt động": "ngung"
+        }
+
+        # Lặp qua DỮ LIỆU TỪ DB và thêm vào bảng
+        count = 0
+        for item in vehicle_data:
+            # item là một tuple, vd: ('51F-123.45', 'VinFast VF 8', 'Nguyễn Văn An', ...)
+            data_values = item
+
+            # Lấy giá trị trạng thái (cột cuối cùng)
+            status_value = item[-1]
+            # Lấy tag màu tương ứng
+            status_tag = tag_map.get(status_value, "")
+
+            self.tree.insert("", "end", text="", values=data_values, tags=(status_tag,))
+            count += 1
+
+        self.pagination_label.config(text=f"Hiển thị {count} trong {count} kết quả.")
 
     def on_tree_select(self, event):
         """Kích hoạt nút Sửa/Xóa khi một dòng được chọn."""
