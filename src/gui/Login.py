@@ -17,7 +17,8 @@ COLOR_BORDER = "#B0B0B0"
 
 # --- KHỞI TẠO CỬA SỔ LOGIN ---
 # (Tên biến 'app' là cửa sổ Login)
-app = ttk.Window(title="Đăng Nhập Hệ Thống")
+app = ttk.Window(title="Đăng Nhập Hệ Thống", themename="cosmo")
+style = Style()
 app.geometry("900x600")
 app.resizable(True, True)
 app.configure(background=COLOR_BACKGROUND)

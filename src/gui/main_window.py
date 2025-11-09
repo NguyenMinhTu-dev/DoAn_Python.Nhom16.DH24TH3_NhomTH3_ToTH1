@@ -245,6 +245,6 @@ class Application(ttk.Window):
 
 
 # --- CHẠY ỨNG DỤNG ---
-#if __name__ == "__main__":
-  #  app = Application(themename="cosmo")
-  #  app.mainloop()
+if __name__ == "__main__":
+    app = Application(themename="cosmo")
+    app.mainloop()

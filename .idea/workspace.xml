@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8747d704-f226-4f97-a3e3-89b0df8fe83b" name="Changes" comment=" ui" />
+    <list default="true" id="8747d704-f226-4f97-a3e3-89b0df8fe83b" name="Changes" comment="QLXEVALAIXE">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Login.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Login.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -61,7 +65,7 @@
       <recent name="D:\Python\DoAn\src\database" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.Login (1)">
+  <component name="RunManager" selected="Python.main_window">
     <configuration name="Login (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="DoAn" />
       <option name="ENV_FILES" value="" />
@@ -196,8 +200,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.Login (1)" />
         <item itemvalue="Python.main_window" />
+        <item itemvalue="Python.Login (1)" />
         <item itemvalue="Python.database_connector" />
         <item itemvalue="Python.dashbroad_model" />
         <item itemvalue="Python.main" />
@@ -235,12 +239,44 @@
       <option name="project" value="LOCAL" />
       <updated>1762669153078</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="QLXEVALAIXE">
+      <option name="closed" value="true" />
+      <created>1762669417438</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1762669417438</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="master" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="&quot;sửa lỗi&quot;" />
     <MESSAGE value=" ui" />
-    <option name="LAST_COMMIT_MESSAGE" value=" ui" />
+    <MESSAGE value="QLXEVALAIXE" />
+    <option name="LAST_COMMIT_MESSAGE" value="QLXEVALAIXE" />
   </component>
 </project>
