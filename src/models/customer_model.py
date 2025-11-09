@@ -15,11 +15,10 @@ class CustomerModel:
             # Câu query này chọn các cột khớp với Treeview
             query = """
                 SELECT 
-                    ma_khach_hang, 
+                    id_khach_hang, 
                     ho_ten, 
                     so_dien_thoai, 
-                    email, 
-                    tong_so_chuyen_di, 
+                    email,  
                     hang_thanh_vien 
                 FROM KhachHang
             """
