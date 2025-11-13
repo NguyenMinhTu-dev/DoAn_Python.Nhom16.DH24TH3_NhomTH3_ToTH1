@@ -175,15 +175,17 @@ class VehiclePage(ttk.Frame):
     def open_edit_vehicle_modal(self):
         selected = self.tree.selection()
         if not selected:
-            messagebox.showwarning("Chú ý", "Vui lòng chọn một xe để sửa.")
             return
 
         item = self.tree.item(selected[0])
-        values = item['values']
-        vehicle_id = values[0]  # id_phuong_tien
+        vehicle_id = item['values'][0]  # id_phuong_tien
 
-        # Tạo form EditVehicleModal với dữ liệu sẵn
-        EditVehicleModal(self, self.db_model, vehicle_id, callback=lambda: self.load_data_into_tree())
+        vehicle_data = self.db_model.get_vehicle_by_id(vehicle_id)
+        if not vehicle_data:
+            messagebox.showerror("Lỗi", "Không tìm thấy dữ liệu phương tiện.")
+            return
+
+        EditVehicleModal(self, self.db_model, vehicle_data, callback=lambda: self.load_data_into_tree())
 
     def delete_selected_vehicle(self):
         selected = self.tree.selection()
@@ -191,12 +193,16 @@ class VehiclePage(ttk.Frame):
             return
 
         item = self.tree.item(selected[0])
-        plate = item['values'][1]  # Chỉ số cột chứa biển số xe, chỉnh theo Treeview của bạn
+        plate = item['values'][1]
+
+        if not plate:  # Kiểm tra None/empty
+            messagebox.showerror("Lỗi", "Biển số xe không hợp lệ.")
+            return
 
         if messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn xóa phương tiện {plate}?"):
             success = self.db_model.delete_vehicle(plate)
             if success:
-                messagebox.showinfo("Thành công", "Đã xóa phương tiện.")
+                messagebox.showinfo("Thành công", f"Đã xóa phương tiện {plate}.")
                 self.load_data_into_tree()
             else:
                 messagebox.showerror("Lỗi", "Không thể xóa phương tiện.")
@@ -258,6 +264,13 @@ class VehiclePage(ttk.Frame):
                 self.tree.selection_set()
     # === FORM THÊM/SỬA XE ===
 class AddVehicleModal(tk.Toplevel):
+    """
+    Modal để thêm xe mới.
+    parent: VehiclePage để reload treeview
+    db_model: instance của VehicleModel
+    callback: hàm gọi lại khi thêm thành công (ví dụ reload treeview)
+    """
+
     def __init__(self, parent, db_model, callback=None):
         super().__init__(parent)
         self.parent = parent
@@ -298,13 +311,15 @@ class AddVehicleModal(tk.Toplevel):
 
         # Tài xế phụ trách (Combobox)
         ttk.Label(container, text="Tài xế phụ trách:").grid(row=5, column=0, columnspan=2, sticky="w", pady=(10, 0))
-        self.driver_combo = ttk.Combobox(container, width=50)
+        self.driver_combo = ttk.Combobox(container, width=50, state="readonly")
         self.driver_combo.grid(row=6, column=0, columnspan=2, sticky="ew", pady=2)
+
+        # Load danh sách tài xế
         self.load_driver_names()
 
         # Trạng thái
         ttk.Label(container, text="Trạng thái:").grid(row=7, column=0, columnspan=2, sticky="w", pady=(10, 0))
-        self.status_combo = ttk.Combobox(container, values=["Hoạt động", "Bảo trì", "Ngừng hoạt động"])
+        self.status_combo = ttk.Combobox(container, values=["Hoạt động", "Bảo trì", "Ngừng hoạt động"], state="readonly")
         self.status_combo.grid(row=8, column=0, columnspan=2, sticky="ew", pady=2)
         self.status_combo.current(0)
 
@@ -320,17 +335,20 @@ class AddVehicleModal(tk.Toplevel):
         container.columnconfigure(1, weight=1)
 
     def load_driver_names(self):
+        """Load danh sách tài xế từ db_model để cho combobox chọn"""
         try:
             drivers = self.db_model.get_all_drivers(status="Hoạt động")
-            self.drivers_map = {d[1]: d[0] for d in drivers}  # {tên: mã}
-            names = list(self.drivers_map.keys())
+            names = [driver[1] for driver in drivers]  # cột 1 là tên
             self.driver_combo['values'] = names
             if names:
                 self.driver_combo.current(0)
-            else:
-                self.driver_combo.set("Chưa có tài xế")
+
+            # Mapping: tên -> mã
+            self.driver_map = {driver[1]: driver[0] for driver in drivers}
+
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tải danh sách tài xế: {e}")
+            self.driver_map = {}
 
     def save_vehicle(self):
         try:
@@ -340,7 +358,7 @@ class AddVehicleModal(tk.Toplevel):
                 return
 
             driver_name = self.driver_combo.get().strip()
-            driver_code = self.drivers_map.get(driver_name)  # None nếu trống
+            driver_code = self.driver_map.get(driver_name, None)
 
             data = {
                 'plate': plate,
@@ -351,149 +369,136 @@ class AddVehicleModal(tk.Toplevel):
                 'driver_code': driver_code
             }
 
-            self.db_model.add_vehicle(data)
-            messagebox.showinfo("Thành công", "Xe mới đã được thêm.")
-            self.destroy()
-            if self.callback:
-                self.callback()
+            success = self.db_model.add_vehicle(data)
+            if success:
+                messagebox.showinfo("Thành công", "Xe mới đã được thêm.")
+                self.destroy()
+                if self.callback:
+                    self.callback()
 
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể thêm xe: {e}")
 class EditVehicleModal(tk.Toplevel):
     """
-    Modal sửa thông tin phương tiện.
+    Modal chỉnh sửa thông tin phương tiện.
     parent: VehiclePage để reload treeview
     db_model: instance của VehicleModel
-    vehicle_id: id_phuong_tien
+    vehicle_data: dictionary dữ liệu phương tiện
     callback: hàm gọi lại khi cập nhật thành công
     """
-
-    def __init__(self, parent, db_model, vehicle_id, callback=None):
+    def __init__(self, parent, db_model, vehicle_data, callback=None):
         super().__init__(parent)
         self.parent = parent
         self.db_model = db_model
-        self.vehicle_id = vehicle_id
+        self.vehicle_data = vehicle_data
         self.callback = callback
 
-        self.title("Sửa Thông Tin Phương Tiện")
+        self.title("Sửa Phương Tiện")
         self.geometry("520x500")
         self.resizable(False, False)
 
         container = ttk.Frame(self, padding=20)
         container.pack(fill="both", expand=True)
 
-        ttk.Label(container, text="✏️ Sửa Phương Tiện", font=("Arial", 16, "bold")).grid(
+        ttk.Label(container, text="🛞 Sửa Phương Tiện", font=("Arial", 16, "bold")).grid(
             row=0, column=0, columnspan=2, sticky="w", pady=(0, 15)
         )
 
-        # Lấy dữ liệu phương tiện
-        vehicle_data = self.get_vehicle_data()
-        if not vehicle_data:
-            messagebox.showerror("Lỗi", "Không tìm thấy dữ liệu phương tiện.")
-            self.destroy()
-            return
-
-        # --- Biển số (không sửa) ---
+        # Biển số xe (có thể cho sửa)
         ttk.Label(container, text="Biển số xe:").grid(row=1, column=0, sticky="w", padx=(0, 10))
-        self.plate_label = ttk.Label(container, text=vehicle_data['bien_so_xe'])
-        self.plate_label.grid(row=2, column=0, sticky="w", padx=(0, 10), pady=2)
+        self.plate_entry = ttk.Entry(container, width=22)
+        self.plate_entry.grid(row=2, column=0, sticky="ew", padx=(0, 10), pady=2)
+        self.plate_entry.insert(0, vehicle_data['bien_so_xe'])
 
-        # --- Loại xe ---
+        # Loại xe
         ttk.Label(container, text="Loại xe:").grid(row=1, column=1, sticky="w")
-        self.type_entry = ttk.Entry(container)
+        self.type_entry = ttk.Entry(container, width=22)
         self.type_entry.grid(row=2, column=1, sticky="ew", pady=2)
         self.type_entry.insert(0, vehicle_data['loai_xe'])
 
-        # --- Số km ---
-        ttk.Label(container, text="Số km đã đi:").grid(row=3, column=0, sticky="w", pady=(10, 0))
-        self.mileage_entry = ttk.Entry(container)
+        # Số km
+        ttk.Label(container, text="Số km:").grid(row=3, column=0, sticky="w", pady=(10, 0))
+        self.mileage_entry = ttk.Entry(container, width=22)
         self.mileage_entry.grid(row=4, column=0, sticky="ew", padx=(0, 10), pady=2)
         self.mileage_entry.insert(0, vehicle_data['so_km_da_di'])
 
-        # --- Bảo trì lần cuối ---
+        # Bảo trì lần cuối
         ttk.Label(container, text="Bảo trì lần cuối:").grid(row=3, column=1, sticky="w", pady=(10, 0))
-        self.maintenance_entry = DateEntry(container, dateformat="%d/%m/%Y", bootstyle="info")
+        self.maintenance_entry = DateEntry(container, dateformat="%d/%m/%Y", bootstyle="info", width=22)
         self.maintenance_entry.grid(row=4, column=1, sticky="ew", pady=2)
         if vehicle_data['ngay_bao_tri_cuoi']:
             self.maintenance_entry.set_date(vehicle_data['ngay_bao_tri_cuoi'])
         else:
             self.maintenance_entry.set_date(datetime.date.today())
 
-        # --- Tài xế phụ trách ---
+        # Tài xế phụ trách
         ttk.Label(container, text="Tài xế phụ trách:").grid(row=5, column=0, columnspan=2, sticky="w", pady=(10, 0))
-        self.driver_combo = ttk.Combobox(container, width=50)
+        self.driver_combo = ttk.Combobox(container, width=50, state="readonly")
         self.driver_combo.grid(row=6, column=0, columnspan=2, sticky="ew", pady=2)
-        self.load_driver_names(vehicle_data['ma_tai_xe_phu_trach'])
+        self.load_driver_names()
+        # Chọn tài xế hiện tại
+        current_driver = vehicle_data.get('ma_tai_xe_phu_trach')
+        if current_driver and current_driver in self.driver_map.values():
+            name = [k for k, v in self.driver_map.items() if v == current_driver][0]
+            self.driver_combo.set(name)
 
-        # --- Trạng thái ---
+        # Trạng thái
         ttk.Label(container, text="Trạng thái:").grid(row=7, column=0, columnspan=2, sticky="w", pady=(10, 0))
-        self.status_combo = ttk.Combobox(container, values=["Hoạt động", "Bảo trì", "Ngừng hoạt động"])
+        self.status_combo = ttk.Combobox(container, values=["Hoạt động", "Bảo trì", "Ngừng hoạt động"], state="readonly")
         self.status_combo.grid(row=8, column=0, columnspan=2, sticky="ew", pady=2)
         self.status_combo.set(vehicle_data['trang_thai'])
 
         # Nút Lưu / Hủy
         button_frame = ttk.Frame(container)
         button_frame.grid(row=9, column=0, columnspan=2, pady=25, sticky="ew")
-        ttk.Button(button_frame, text="💾 Lưu", bootstyle="success", command=self.save_vehicle).pack(
-            side="left", expand=True, fill="x", padx=(0, 5))
-        ttk.Button(button_frame, text="❌ Hủy", bootstyle="secondary", command=self.destroy).pack(
-            side="left", expand=True, fill="x", padx=(5, 0))
+        ttk.Button(button_frame, text="💾 Lưu", bootstyle="success", command=self.save_vehicle).pack(side="left", expand=True, fill="x", padx=(0,5))
+        ttk.Button(button_frame, text="❌ Hủy", bootstyle="secondary", command=self.destroy).pack(side="left", expand=True, fill="x", padx=(5,0))
 
         container.columnconfigure(0, weight=1)
         container.columnconfigure(1, weight=1)
 
-    def get_vehicle_data(self):
-        """Lấy dữ liệu phương tiện theo vehicle_id"""
-        vehicles = self.db_model.get_all_vehicles()
-        for v in vehicles:
-            if v[0] == self.vehicle_id:
-                return {
-                    'id_phuong_tien': v[0],
-                    'bien_so_xe': v[1],
-                    'loai_xe': v[2],
-                    'so_km_da_di': v[3],
-                    'ngay_bao_tri_cuoi': v[4],
-                    'trang_thai': v[5],
-                    'ma_tai_xe_phu_trach': v[6]
-                }
-        return None
-
-    def load_driver_names(self, current_driver_code=None):
-        """Load danh sách tài xế từ database"""
+    def load_driver_names(self):
+        """Load danh sách tài xế từ DB."""
         try:
             drivers = self.db_model.get_all_drivers(status="Hoạt động")
-            self.driver_map = {driver[1]: driver[0] for driver in drivers}  # {tên: mã}
-            names = list(self.driver_map.keys())
-            self.driver_combo['values'] = names
-            # chọn tài xế hiện tại
-            if current_driver_code:
-                for name, code in self.driver_map.items():
-                    if code == current_driver_code:
-                        self.driver_combo.set(name)
-                        break
-            elif names:
-                self.driver_combo.current(0)
+            self.driver_map = {d[1]: d[0] for d in drivers}  # {name: ma_tai_xe}
+            self.driver_combo['values'] = list(self.driver_map.keys())
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tải danh sách tài xế: {e}")
 
     def save_vehicle(self):
         try:
+            vehicle_id = self.vehicle_data['id_phuong_tien']
             driver_name = self.driver_combo.get().strip()
             driver_code = self.driver_map.get(driver_name, None)
 
+            # Lấy biển số hiện tại từ vehicle_data vì không sửa được
+            plate = self.vehicle_data['bien_so_xe']
+
             data = {
-                'type': self.type_entry.get(),
+                'plate': plate,  # Gán biển số để tránh NULL
+                'type': self.type_entry.get().strip(),
                 'mileage': int(self.mileage_entry.get()),
                 'last_maintenance': self.maintenance_entry.get_date().strftime("%Y-%m-%d"),
                 'status': self.status_combo.get(),
                 'driver_code': driver_code
             }
 
-            self.db_model.edit_vehicle(self.vehicle_id, data)
-            messagebox.showinfo("Thành công", "Đã cập nhật phương tiện.")
-            self.destroy()
-            if self.callback:
-                self.callback()
+            # Kiểm tra biển số trùng (nếu muốn)
+            if self.db_model.is_plate_exists(plate, exclude_vehicle_id=vehicle_id):
+                messagebox.showerror("Lỗi", f"Biển số {plate} đã tồn tại!")
+                return
 
+            success = self.db_model.update_vehicle_by_id(vehicle_id, data)
+            if success:
+                messagebox.showinfo("Thành công", "Phương tiện đã được cập nhật.")
+                self.destroy()
+                if self.callback:
+                    self.callback()
+            else:
+                messagebox.showerror("Lỗi", "Không thể cập nhật phương tiện.")
+
+        except ValueError:
+            messagebox.showerror("Lỗi", "Số km phải là một số nguyên.")
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể cập nhật phương tiện: {e}")
