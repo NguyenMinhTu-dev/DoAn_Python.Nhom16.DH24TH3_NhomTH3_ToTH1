@@ -5,7 +5,7 @@ import hashlib
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': '11022005',  # <-- THAY MẬT KHẨU CỦA BẠN VÀO ĐÂY
+    'password': '11022005_tU',  # <-- THAY MẬT KHẨU CỦA BẠN VÀO ĐÂY
     'database': 'QLXEVALAIXE'  # Tên database tiếng Việt
 }
 
