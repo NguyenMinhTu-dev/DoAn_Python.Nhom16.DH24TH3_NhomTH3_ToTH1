@@ -408,8 +408,57 @@ class EditDriverModal(tk.Toplevel):
         ttk.Button(button_frame, text="Hủy", command=self.destroy, bootstyle="secondary-outline").pack(side="right", padx=10)
 
     def create_form_widgets(self, parent, driver_data):
-        # Tương tự AddDriverModal nhưng điền sẵn driver_data vào Entry/Combobox
-        pass  # copy từ AddDriverModal và set giá trị .insert(0, value)
+            form_frame = ttk.Frame(parent, style='light')
+            form_frame.pack(fill="x")
+
+            form_frame.columnconfigure(1, weight=1)
+
+            # --- Họ Tên ---
+            ttk.Label(form_frame, text="Họ Tên", font=("Arial", 10, "bold")).grid(row=0, column=0, columnspan=2,
+                                                                                  sticky="w", pady=(10, 0))
+            self.name_entry = ttk.Entry(form_frame, font=("Arial", 12))
+            self.name_entry.grid(row=1, column=0, columnspan=2, sticky="ew", padx=(0, 10), ipady=5)
+            self.name_entry.insert(0, driver_data[1] if driver_data else "")
+
+            # --- Email ---
+            ttk.Label(form_frame, text="Email", font=("Arial", 10, "bold")).grid(row=2, column=0, sticky="w",
+                                                                                 pady=(10, 0))
+            self.email_entry = ttk.Entry(form_frame, font=("Arial", 12))
+            self.email_entry.grid(row=3, column=0, sticky="ew", padx=(0, 10), ipady=5)
+            self.email_entry.insert(0, driver_data[4] if driver_data else "")
+
+            # --- Số Điện Thoại ---
+            ttk.Label(form_frame, text="Số Điện Thoại", font=("Arial", 10, "bold")).grid(row=2, column=1, sticky="w",
+                                                                                         pady=(10, 0))
+            self.phone_entry = ttk.Entry(form_frame, font=("Arial", 12))
+            self.phone_entry.grid(row=3, column=1, sticky="ew", padx=(10, 0), ipady=5)
+            self.phone_entry.insert(0, driver_data[5] if driver_data else "")
+
+            # --- Hạng Xe Lái ---
+            ttk.Label(form_frame, text="Hạng Xe Lái", font=("Arial", 10, "bold")).grid(row=4, column=0, sticky="w",
+                                                                                       pady=(10, 0))
+            self.vehicle_combo = ttk.Combobox(form_frame, values=["Xe 4 Chỗ", "Xe 7 Chỗ", "Xe Bán Tải"],
+                                              state="readonly")
+            self.vehicle_combo.grid(row=5, column=0, sticky="ew", padx=(0, 10), ipady=5)
+            self.vehicle_combo.set(driver_data[2] if driver_data else "Xe 4 Chỗ")
+
+            # --- Số Bằng Lái ---
+            ttk.Label(form_frame, text="Số Bằng Lái", font=("Arial", 10, "bold")).grid(row=4, column=1, sticky="w",
+                                                                                       pady=(10, 0))
+            self.license_entry = ttk.Entry(form_frame, font=("Arial", 12))
+            self.license_entry.grid(row=5, column=1, sticky="ew", padx=(10, 0), ipady=5)
+            self.license_entry.insert(0, driver_data[3] if driver_data else "")
+
+            # --- Trạng Thái ---
+            ttk.Label(form_frame, text="Trạng Thái", font=("Arial", 10, "bold")).grid(row=6, column=0, columnspan=2,
+                                                                                      sticky="w", pady=(10, 0))
+            self.status_combo = ttk.Combobox(form_frame, values=["Hoạt động", "Tạm ngưng", "Chờ duyệt"],
+                                             state="readonly")
+            self.status_combo.grid(row=7, column=0, columnspan=2, sticky="ew", padx=(0, 10), ipady=5)
+            self.status_combo.set(driver_data[7] if driver_data else "Chờ duyệt")
+
+            form_frame.grid_columnconfigure(0, weight=1)
+            form_frame.grid_columnconfigure(1, weight=1)
 
     def save_driver(self):
         data = {
