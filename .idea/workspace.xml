@@ -4,19 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8747d704-f226-4f97-a3e3-89b0df8fe83b" name="Changes" comment="&quot;cập nhật thêm xóa sửa khách hàng&quot;">
-      <change afterPath="$PROJECT_DIR$/src/gui/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/gui/trip_page.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/models/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/models/trip_model.py" afterDir="false" />
+    <list default="true" id="8747d704-f226-4f97-a3e3-89b0df8fe83b" name="Changes" comment="&quot;update&quot;">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/database/db.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/db.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/Login.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Login.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/customer_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/customer_page.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/main_window.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/driver_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/driver_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/trip_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/trip_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/vehicle_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/vehicle_page.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/models/customer_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/customer_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/dashbroad_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/dashbroad_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/driver_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/driver_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/trip_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/trip_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/vehicle_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/vehicle_model.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -218,8 +215,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.Login (1)" />
         <item itemvalue="Python.db_connect" />
+        <item itemvalue="Python.Login (1)" />
         <item itemvalue="Python.main_window" />
         <item itemvalue="Python.database_connector" />
       </list>
@@ -512,7 +509,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763175932648</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="&quot;update&quot;">
+      <option name="closed" value="true" />
+      <created>1763183008731</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1763183008731</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -548,7 +553,6 @@
     <MESSAGE value="&quot;sửa cửa sổ chính&quot;" />
     <MESSAGE value="&quot;database&quot;" />
     <MESSAGE value="&quot;chuc nang KH&quot;" />
-    <MESSAGE value="&quot;update&quot;" />
     <MESSAGE value="&quot;chuc nang ql xe&quot;" />
     <MESSAGE value="&quot;sua giao dien&quot;" />
     <MESSAGE value="&quot;chuc năng ql tai xe&quot;" />
@@ -561,6 +565,7 @@
     <MESSAGE value="&quot;sửa&quot;" />
     <MESSAGE value="&quot;sửaa&quot;" />
     <MESSAGE value="&quot;cập nhật thêm xóa sửa khách hàng&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="&quot;cập nhật thêm xóa sửa khách hàng&quot;" />
+    <MESSAGE value="&quot;update&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="&quot;update&quot;" />
   </component>
 </project>

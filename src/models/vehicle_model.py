@@ -1,61 +1,171 @@
+# models/vehicle_model.py
 from .db_connect import Database
 import mysql.connector
-from tkinter import messagebox
 
 
 class VehicleModel:
 
-    def get_all_vehicles(self, status=None):
+    def get_all_vehicles(self, status=None, search=None):
         """
-        Lấy tất cả phương tiện từ CSDL, có thể lọc theo trạng thái.
+        Lấy tất cả phương tiện, JOIN với tài xế, có thể lọc/tìm kiếm.
         """
         db = None
         try:
             db = Database()
-
+            # Câu query này JOIN 2 bảng
             query = """
                 SELECT 
-                    `id_phuong_tien`,
-                    `bien_so_xe`,
-                    `loai_xe`,
-                    `so_km_da_di`,
-                    `ngay_bao_tri_cuoi`,
-                    `trang_thai`,
-                    `ma_tai_xe_phu_trach`
-                FROM `PhuongTien`
+                    p.id_phuong_tien, 
+                    p.bien_so_xe, 
+                    p.loai_xe, 
+                    p.so_km_da_di, 
+                    p.ngay_bao_tri_cuoi, 
+                    p.trang_thai, 
+                    t.ho_ten -- Lấy tên tài xế
+                FROM PhuongTien AS p
+                LEFT JOIN TaiXe AS t 
+                    ON p.ma_tai_xe_phu_trach = t.ma_tai_xe
             """
+
             params = []
+            conditions = []
+
+            # 1. Lọc theo Trạng thái
             if status:
-                query += " WHERE `trang_thai` = %s"
+                conditions.append("p.trang_thai = %s")
                 params.append(status)
 
-            # Sử dụng params nếu có, nếu không thì gọi query không tham số
-            return db.fetch_all(query, params) if params else db.fetch_all(query)
+            # 2. Lọc theo Tìm kiếm
+            if search:
+                search_like = f"%{search}%"
+                # Tìm theo Biển số HOẶC Loại xe
+                conditions.append("(p.bien_so_xe LIKE %s OR p.loai_xe LIKE %s)")
+                params.extend([search_like, search_like])
+
+            # 3. Nối các điều kiện
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+
+            query += " ORDER BY p.id_phuong_tien"
+
+            if params:
+                return db.fetch_all(query, params)
+            else:
+                return db.fetch_all(query)
 
         except mysql.connector.Error as err:
-            messagebox.showerror("Lỗi DB", f"Lỗi khi tải dữ liệu Phương tiện: {err}")
+            print(f"Lỗi khi lấy dữ liệu phương tiện: {err}")
             return []
         finally:
             if db:
                 db.close()
 
-    def add_vehicle(self, data):
+    def get_vehicle_stats(self):
         """
-        Thêm một phương tiện mới vào CSDL.
-        Đã thêm db.conn.commit() và xử lý chuỗi rỗng cho mã tài xế.
+        Lấy số liệu thống kê cho 3 thẻ trên trang Quản lý Phương Tiện.
         """
         db = None
         try:
             db = Database()
 
-            # Chuyển chuỗi rỗng thành None để INSERT NULL vào DB nếu cột cho phép
-            driver_code = data.get('driver_code')
-            if driver_code == '':
-                driver_code = None
+            query_total = "SELECT COUNT(*) FROM PhuongTien"
+            total_count = db.fetch_one(query_total)[0]
 
+            query_active = "SELECT COUNT(*) FROM PhuongTien WHERE trang_thai = 'Hoạt động'"
+            active_count = db.fetch_one(query_active)[0]
+
+            query_maintenance = "SELECT COUNT(*) FROM PhuongTien WHERE trang_thai = 'Bảo trì'"
+            maintenance_count = db.fetch_one(query_maintenance)[0]
+
+            return {
+                "total": total_count or 0,
+                "active": active_count or 0,
+                "maintenance": maintenance_count or 0
+            }
+
+        except mysql.connector.Error as err:
+            print(f"Lỗi khi lấy số liệu thống kê phương tiện: {err}")
+            return {"total": 0, "active": 0, "maintenance": 0}
+        finally:
+            if db:
+                db.close()
+
+    # --- CÁC HÀM HỖ TRỢ CHO MODAL ---
+    # (Dựa trên code `vehicle_page.py` của bạn)
+
+    def get_available_drivers(self):
+        """
+        Lấy danh sách các tài xế 'Hoạt động' VÀ 'chưa được gán xe'.
+        """
+        db = None
+        try:
+            db = Database()
+            # Lấy các tài xế hoạt động
+            query_active_drivers = "SELECT ma_tai_xe, ho_ten FROM TaiXe WHERE trang_thai = 'Hoạt động'"
+            active_drivers = db.fetch_all(query_active_drivers)
+
+            # Lấy các tài xế đã được gán xe
+            query_assigned_drivers = "SELECT ma_tai_xe_phu_trach FROM PhuongTien WHERE ma_tai_xe_phu_trach IS NOT NULL"
+            assigned_list = [row[0] for row in db.fetch_all(query_assigned_drivers)]
+
+            # Lọc ra những người chưa được gán
+            available = [driver for driver in active_drivers if driver[0] not in assigned_list]
+            return available
+
+        except mysql.connector.Error as err:
+            print(f"Lỗi khi lấy danh sách tài xế có sẵn: {err}")
+            return []
+        finally:
+            if db:
+                db.close()
+
+    def get_driver_info(self, driver_code):
+        """Lấy Mã và Tên của MỘT tài xế (dùng cho form Edit)."""
+        db = None
+        try:
+            db = Database()
+            query = "SELECT ma_tai_xe, ho_ten FROM TaiXe WHERE ma_tai_xe = %s"
+            return db.fetch_one(query, (driver_code,))
+        except mysql.connector.Error as err:
+            print(f"Lỗi khi lấy thông tin tài xế {driver_code}: {err}")
+            return None
+        finally:
+            if db:
+                db.close()
+
+    def is_plate_exists(self, plate, exclude_vehicle_id=None):
+        """
+        Kiểm tra biển số xe đã tồn tại chưa.
+        Nếu có 'exclude_vehicle_id', bỏ qua ID đó (dùng khi EDIT).
+        """
+        db = None
+        try:
+            db = Database()
+            query = "SELECT id_phuong_tien FROM PhuongTien WHERE bien_so_xe = %s"
+            params = [plate]
+
+            if exclude_vehicle_id:
+                query += " AND id_phuong_tien != %s"
+                params.append(exclude_vehicle_id)
+
+            result = db.fetch_one(query, tuple(params))
+            return result is not None  # True nếu tồn tại
+
+        except mysql.connector.Error as err:
+            print(f"Lỗi khi kiểm tra biển số: {err}")
+            return True  # Mặc định là True để tránh lỗi
+        finally:
+            if db:
+                db.close()
+
+    def add_vehicle(self, data):
+        """Thêm xe mới vào CSDL."""
+        db = None
+        try:
+            db = Database()
             query = """
-                INSERT INTO `PhuongTien` 
-                (`bien_so_xe`, `loai_xe`, `so_km_da_di`, `ngay_bao_tri_cuoi`, `trang_thai`, `ma_tai_xe_phu_trach`)
+                INSERT INTO PhuongTien 
+                (bien_so_xe, loai_xe, so_km_da_di, ngay_bao_tri_cuoi, trang_thai, ma_tai_xe_phu_trach) 
                 VALUES (%s, %s, %s, %s, %s, %s)
             """
             params = (
@@ -64,147 +174,82 @@ class VehicleModel:
                 data['mileage'],
                 data['last_maintenance'],
                 data['status'],
-                driver_code
+                data['driver_code']  # Có thể là None
             )
-
             db.execute_query(query, params)
-            db.conn.commit()  # <<< Đảm bảo thay đổi được lưu
             return True
-
         except mysql.connector.Error as err:
-            messagebox.showerror("Lỗi Thêm Mới", f"Không thể thêm Phương tiện:\n{err}")
+            print(f"Lỗi khi thêm phương tiện: {err}")
             return False
         finally:
             if db:
                 db.close()
 
-    def update_vehicle_by_id(self, vehicle_id, data):
-        """
-        Cập nhật thông tin phương tiện dựa trên id_phuong_tien.
-        Đã xử lý chuỗi rỗng cho mã tài xế và đảm bảo commit.
-        """
+    def get_vehicle_by_id(self, vehicle_id):
+        """Lấy toàn bộ dữ liệu của 1 xe bằng ID (dạng dictionary)."""
         db = None
         try:
             db = Database()
+            query = "SELECT * FROM PhuongTien WHERE id_phuong_tien = %s"
+            # Lấy tên cột
+            db.execute_query(query, (vehicle_id,))
+            result = db.cursor.fetchone()
+            if result:
+                # Chuyển (tuple) thành {dict}
+                column_names = [desc[0] for desc in db.cursor.description]
+                return dict(zip(column_names, result))
+            return None
+        except mysql.connector.Error as err:
+            print(f"Lỗi khi lấy xe theo ID: {err}")
+            return None
+        finally:
+            if db:
+                db.close()
 
-            # Chuyển chuỗi rỗng thành None
-            driver_code = data.get('driver_code')
-            if driver_code == '':
-                driver_code = None
-
+    def update_vehicle_by_id(self, vehicle_id, data):
+        """Cập nhật xe dựa trên ID."""
+        db = None
+        try:
+            db = Database()
             query = """
-                UPDATE PhuongTien
-                SET bien_so_xe=%s, loai_xe=%s, so_km_da_di=%s,
-                    ngay_bao_tri_cuoi=%s, trang_thai=%s, ma_tai_xe_phu_trach=%s
-                WHERE id_phuong_tien=%s
+                UPDATE PhuongTien SET
+                    loai_xe = %s,
+                    so_km_da_di = %s,
+                    ngay_bao_tri_cuoi = %s,
+                    trang_thai = %s,
+                    ma_tai_xe_phu_trach = %s,
+                    bien_so_xe = %s 
+                WHERE 
+                    id_phuong_tien = %s
             """
             params = (
-                data['plate'],
                 data['type'],
                 data['mileage'],
                 data['last_maintenance'],
                 data['status'],
-                driver_code,
+                data['driver_code'],
+                data['plate'],  # Biển số xe (dù không sửa)
                 vehicle_id
             )
-
             db.execute_query(query, params)
-            db.conn.commit()  # <<< Đảm bảo thay đổi được lưu
             return True
-
         except mysql.connector.Error as err:
-            messagebox.showerror("Lỗi Cập Nhật", f"Không thể cập nhật Phương tiện:\n{err}")
+            print(f"Lỗi khi cập nhật phương tiện {vehicle_id}: {err}")
             return False
         finally:
             if db:
                 db.close()
 
     def delete_vehicle(self, plate):
-        """
-        Xóa phương tiện dựa trên biển số xe.
-        """
+        """Xóa xe dựa trên BIỂN SỐ XE."""
         db = None
         try:
             db = Database()
             query = "DELETE FROM PhuongTien WHERE bien_so_xe = %s"
-            params = (plate,)
-            db.execute_query(query, params)
-            db.conn.commit()  # Commit để thay đổi lưu lại
+            db.execute_query(query, (plate,))
             return True
         except mysql.connector.Error as err:
-            messagebox.showerror("Lỗi Xóa", f"Không thể xóa Phương tiện:\n{err}")
-            return False
-        finally:
-            if db:
-                db.close()
-
-    def get_all_drivers(self, status=None):
-        """
-        Lấy tất cả tài xế để hiển thị trong Combobox, có thể lọc theo trạng thái.
-        """
-        db = None
-        try:
-            db = Database()
-            query = "SELECT ma_tai_xe, ho_ten FROM TaiXe"
-            params = []
-            if status:
-                query += " WHERE trang_thai = %s"
-                params.append(status)
-            return db.fetch_all(query, params) if params else db.fetch_all(query)
-        except mysql.connector.Error as err:
-            messagebox.showerror("Lỗi DB", f"Lỗi khi tải danh sách tài xế: {err}")
-            return []
-        finally:
-            if db:
-                db.close()
-
-    def get_vehicle_by_id(self, vehicle_id):
-        """
-        Lấy thông tin chi tiết của phương tiện theo ID.
-        """
-        db = None
-        try:
-            db = Database()
-            query = """
-                SELECT id_phuong_tien, bien_so_xe, loai_xe, so_km_da_di, 
-                       ngay_bao_tri_cuoi, trang_thai, ma_tai_xe_phu_trach
-                FROM PhuongTien
-                WHERE id_phuong_tien = %s
-            """
-            result = db.fetch_one(query, (vehicle_id,))
-            if result:
-                return {
-                    'id_phuong_tien': result[0],
-                    'bien_so_xe': result[1],
-                    'loai_xe': result[2],
-                    'so_km_da_di': result[3],
-                    'ngay_bao_tri_cuoi': result[4],
-                    'trang_thai': result[5],
-                    'ma_tai_xe_phu_trach': result[6]
-                }
-            return None
-        finally:
-            if db:
-                db.close()
-
-    def is_plate_exists(self, plate, exclude_vehicle_id=None):
-        """
-        Kiểm tra xem biển số xe đã tồn tại trong DB chưa, loại trừ chính xe đang sửa.
-        """
-        db = None
-        try:
-            db = Database()
-            query = "SELECT COUNT(*) FROM PhuongTien WHERE bien_so_xe=%s"
-            params = [plate]
-            if exclude_vehicle_id:
-                query += " AND id_phuong_tien <> %s"
-                params.append(exclude_vehicle_id)
-
-            result = db.fetch_one(query, params)
-            return result[0] > 0 if result else False
-
-        except Exception as e:
-            print(f"Lỗi kiểm tra biển số: {e}")
+            print(f"Lỗi khi xóa phương tiện {plate}: {err}")
             return False
         finally:
             if db:

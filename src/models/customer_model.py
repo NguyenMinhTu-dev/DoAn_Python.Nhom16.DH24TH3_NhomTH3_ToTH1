@@ -4,31 +4,48 @@ import mysql.connector
 
 class CustomerModel:
 
-    def get_all_customers(self, rank=None):
+    # (Đây là code để bạn chép vào file models/customer_model.py)
+
+    def get_all_customers(self, rank=None, search=None):
         """
-        Lấy tất cả khách hàng từ CSDL, có thể lọc theo hạng thành viên.
+        Lấy tất cả khách hàng, có thể lọc theo HẠNG và TÌM KIẾM.
         """
         db = None
         try:
             db = Database()
-
-            # Câu query này chọn các cột khớp với Treeview
             query = """
-                SELECT 
-                    id_khach_hang, 
-                    ho_ten, 
-                    so_dien_thoai, 
-                    email,  
-                    hang_thanh_vien 
-                FROM KhachHang
-            """
+                    SELECT 
+                        id_khach_hang, 
+                        ho_ten, 
+                        so_dien_thoai, 
+                        email,  
+                        hang_thanh_vien 
+                    FROM KhachHang
+                """
 
             params = []
+            conditions = []  # Dùng để nối các điều kiện WHERE
+
+            # 1. Xử lý lọc theo Hạng (rank)
             if rank:
-                query += " WHERE hang_thanh_vien = %s"
+                conditions.append("hang_thanh_vien = %s")
                 params.append(rank)
 
-            # Sắp xếp theo ID để đảm bảo thứ tự nhất quán
+            # 2. Xử lý lọc theo Tìm kiếm (search)
+            if search:
+                # Tìm kiếm ở 3 cột: Mã, Tên, SĐT
+                search_like = f"%{search}%"
+                conditions.append("""
+                        (id_khach_hang LIKE %s OR 
+                         ho_ten LIKE %s OR 
+                         so_dien_thoai LIKE %s)
+                    """)
+                params.extend([search_like, search_like, search_like])
+
+            # 3. Nối các điều kiện lại
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+
             query += " ORDER BY id_khach_hang"
 
             if params:

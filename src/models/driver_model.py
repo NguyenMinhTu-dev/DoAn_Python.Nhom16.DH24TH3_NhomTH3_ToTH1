@@ -5,32 +5,56 @@ from tkinter import messagebox  # Cần để hiển thị lỗi DB
 
 class DriverModel:
 
-    def get_all_drivers(self, status=None):
+    # (Đây là code để bạn chép vào file models/driver_model.py)
+    # (Giả sử bạn đã import Database và mysql.connector)
+
+    def get_all_drivers(self, status=None, search=None):
         """
-        Lấy tất cả tài xế từ CSDL, có thể lọc theo trạng thái.
+        Lấy tất cả tài xế, có thể lọc theo TRẠNG THÁI và TÌM KIẾM.
         """
         db = None
         try:
             db = Database()
-
-            # Câu query này phải khớp với CSDL tiếng Việt của bạn
+            # Câu query này phải khớp với các cột CSDL của bạn
+            # Cột Treeview: (id, name, vehicle_category, license, email, phone, rating, status)
+            # Cột CSDL: (ma_tai_xe, ho_ten, hang_xe_lai, so_bang_lai, email, so_dien_thoai, danh_gia_trung_binh, trang_thai)
             query = """
-                SELECT 
-                    `ma_tai_xe`, 
-                    `ho_ten`, 
-                    `hang_xe_lai`, 
-                    `so_bang_lai`, 
-                    `email`, 
-                    `so_dien_thoai`, 
-                    `danh_gia_trung_binh`, 
-                    `trang_thai` 
-                FROM `TaiXe`
-            """
+                    SELECT 
+                        ma_tai_xe, 
+                        ho_ten, 
+                        hang_xe_lai, 
+                        so_bang_lai, 
+                        email, 
+                        so_dien_thoai, 
+                        danh_gia_trung_binh, 
+                        trang_thai 
+                    FROM TaiXe
+                """
 
             params = []
+            conditions = []  # Dùng để nối các điều kiện WHERE
+
+            # 1. Xử lý lọc theo Trạng thái (status)
             if status:
-                query += " WHERE `trang_thai` = %s"
+                conditions.append("trang_thai = %s")
                 params.append(status)
+
+            # 2. Xử lý lọc theo Tìm kiếm (search)
+            if search:
+                search_like = f"%{search}%"
+                # Tìm kiếm ở 3 cột: Mã, Tên, SĐT
+                conditions.append("""
+                        (ma_tai_xe LIKE %s OR 
+                         ho_ten LIKE %s OR 
+                         so_dien_thoai LIKE %s)
+                    """)
+                params.extend([search_like, search_like, search_like])
+
+            # 3. Nối các điều kiện lại
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+
+            query += " ORDER BY ma_tai_xe"
 
             if params:
                 return db.fetch_all(query, params)
@@ -38,8 +62,41 @@ class DriverModel:
                 return db.fetch_all(query)
 
         except mysql.connector.Error as err:
-            messagebox.showerror("Lỗi DB", f"Lỗi khi tải dữ liệu Tài xế: {err}")
+            print(f"Lỗi khi lấy dữ liệu Tài xế: {err}")
             return []
+        finally:
+            if db:
+                db.close()
+
+    def get_driver_stats(self):
+        """
+        Lấy số liệu thống kê cho 3 thẻ trên trang Quản lý Tài Xế.
+        """
+        db = None
+        try:
+            db = Database()
+
+            # 1. Đếm tổng số tài xế
+            query_total = "SELECT COUNT(*) FROM TaiXe"
+            total_count = db.fetch_one(query_total)[0]
+
+            # 2. Đếm tài xế hoạt động
+            query_active = "SELECT COUNT(*) FROM TaiXe WHERE trang_thai = 'Hoạt động'"
+            active_count = db.fetch_one(query_active)[0]
+
+            # 3. Đếm tài xế không hoạt động (Tạm ngưng + Chờ duyệt)
+            query_inactive = "SELECT COUNT(*) FROM TaiXe WHERE trang_thai != 'Hoạt động'"
+            inactive_count = db.fetch_one(query_inactive)[0]
+
+            return {
+                "total": total_count or 0,
+                "active": active_count or 0,
+                "inactive": inactive_count or 0
+            }
+
+        except mysql.connector.Error as err:
+            print(f"Lỗi khi lấy số liệu thống kê tài xế: {err}")
+            return {"total": 0, "active": 0, "inactive": 0}
         finally:
             if db:
                 db.close()

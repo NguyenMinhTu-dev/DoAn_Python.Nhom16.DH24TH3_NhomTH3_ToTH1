@@ -5,16 +5,15 @@ import mysql.connector
 
 class TripModel:
 
-    def get_all_trips_for_view(self, status=None):
+    def get_all_trips_for_view(self, status=None, search=None):
         """
-        Lấy dữ liệu các chuyến xe để hiển thị lên Treeview.
-        JOIN với bảng KhachHang và TaiXe để lấy tên.
+        Lấy dữ liệu các chuyến xe, JOIN với KhachHang và TaiXe,
+        có thể lọc theo TRẠNG THÁI và TÌM KIẾM.
         """
         db = None
         try:
             db = Database()
 
-            # Câu query này JOIN 3 bảng
             query = """
                 SELECT 
                     c.id_chuyen_xe,
@@ -33,9 +32,28 @@ class TripModel:
             """
 
             params = []
+            conditions = []  # Dùng để nối các điều kiện WHERE
+
+            # 1. Xử lý lọc theo Trạng thái (status)
             if status:
-                query += " WHERE c.trang_thai_chuyen_xe = %s"
+                conditions.append("c.trang_thai_chuyen_xe = %s")
                 params.append(status)
+
+            # 2. Xử lý lọc theo Tìm kiếm (search)
+            if search:
+                search_like = f"%{search}%"
+                # Tìm kiếm ở 4 cột: Mã Chuyến, Tên KH, Tên TX, Biển Số
+                conditions.append("""
+                    (c.id_chuyen_xe LIKE %s OR 
+                     kh.ho_ten LIKE %s OR 
+                     tx.ho_ten LIKE %s OR
+                     c.bien_so_xe LIKE %s)
+                """)
+                params.extend([search_like, search_like, search_like, search_like])
+
+            # 3. Nối các điều kiện lại
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
 
             query += " ORDER BY c.thoi_gian_dat_xe DESC"  # Sắp xếp chuyến mới nhất lên đầu
 
@@ -75,7 +93,6 @@ class TripModel:
                     c.id_chuyen_xe = %s
             """
             params = (trip_id,)
-            # fetch_one vì chúng ta chỉ tìm 1 ID
             return db.fetch_one(query, params)
 
         except mysql.connector.Error as err:
@@ -105,11 +122,9 @@ class TripModel:
 
             db.execute_query(query, params)
 
-            # Kiểm tra xem có hàng nào bị ảnh hưởng không
             if db.cursor.rowcount > 0:
                 return True
             else:
-                # Không hàng nào bị ảnh hưởng (có thể do chuyến đã hoàn thành)
                 return False
 
         except mysql.connector.Error as err:

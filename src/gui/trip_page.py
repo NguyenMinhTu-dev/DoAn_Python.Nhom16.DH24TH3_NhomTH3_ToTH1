@@ -46,51 +46,56 @@ class TripPage(ttk.Frame):
         ttk.Label(left_title_frame, text="Xem lịch sử chuyến xe, doanh thu và các hóa đơn.",
                   style="secondary.TLabel").pack(anchor="w")
 
-        # Nút "Thêm Chuyến" bị ẩn/xóa, vì logic này thường từ app người dùng
-
-        # --- 2. Hàng Thống Kê ---
+        # --- 2. Hàng Thống Kê (SỬA ĐỔI) ---
         stat_frame = ttk.Frame(self, style="TFrame")
         stat_frame.pack(fill="x", expand=True, pady=10)
 
+        # Card 1: Tổng Doanh Thu
         card1 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card1.pack(side="left", fill="x", expand=True, padx=(0, 10))
         ttk.Label(card1, text="Tổng Doanh Thu", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
+        # SỬA: Bỏ 'foreground'
         self.revenue_label = ttk.Label(card1, text="0 đ", font=("Arial", 22, "bold"),
-                                       style="light.TLabel", foreground=COLOR_PRIMARY_TEAL)
+                                       style="light.TLabel")
         self.revenue_label.pack(anchor="w", pady=5)
         ttk.Label(card1, text="Doanh thu từ các chuyến đã hoàn thành", bootstyle="success").pack(anchor="w")
 
+        # Card 2: Chuyến Hoàn Thành
         card2 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card2.pack(side="left", fill="x", expand=True, padx=10)
         ttk.Label(card2, text="Chuyến Hoàn Thành", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
+        # SỬA: Bỏ 'foreground'
         self.completed_label = ttk.Label(card2, text="0", font=("Arial", 22, "bold"),
-                                         style="light.TLabel", foreground=COLOR_BLUE)
+                                         style="light.TLabel")
         self.completed_label.pack(anchor="w", pady=5)
         ttk.Label(card2, text="Tổng số chuyến đã thanh toán", bootstyle="info").pack(anchor="w")
 
+        # Card 3: Chuyến Đang Diễn Ra
         card3 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card3.pack(side="left", fill="x", expand=True, padx=(10, 0))
         ttk.Label(card3, text="Chuyến Đang Diễn Ra", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
+        # SỬA: Bỏ 'foreground'
         self.active_label = ttk.Label(card3, text="0", font=("Arial", 22, "bold"),
-                                      style="light.TLabel", foreground=COLOR_ORANGE)
+                                      style="light.TLabel")
         self.active_label.pack(anchor="w", pady=5)
         ttk.Label(card3, text="Các chuyến chưa kết thúc", bootstyle="warning").pack(anchor="w")
 
         # --- 3. Notebook (Tabs) ---
-        notebook = ttk.Notebook(self)
-        notebook.pack(fill="x", pady=10)
+        self.notebook = ttk.Notebook(self)
+        self.notebook.pack(fill="x", pady=10)
 
-        tab_all = ttk.Frame(notebook)
-        tab_completed = ttk.Frame(notebook)
-        tab_active = ttk.Frame(notebook)
-        tab_cancelled = ttk.Frame(notebook)
+        tab_all = ttk.Frame(self.notebook)
+        tab_completed = ttk.Frame(self.notebook)
+        tab_active = ttk.Frame(self.notebook)
+        tab_cancelled = ttk.Frame(self.notebook)
 
-        notebook.add(tab_all, text="  Tất Cả  ")
-        notebook.add(tab_completed, text="  Hoàn thành  ")
-        notebook.add(tab_active, text="  Đang diễn ra  ")
-        notebook.add(tab_cancelled, text="  Đã hủy  ")
+        self.notebook.add(tab_all, text="  Tất Cả  ")
+        self.notebook.add(tab_completed, text="  Hoàn thành  ")
+        self.notebook.add(tab_active, text="  Đang diễn ra  ")
+        self.notebook.add(tab_cancelled, text="  Đã hủy  ")
 
-        notebook.bind("<<NotebookTabChanged>>", self.on_tab_selected)
+        # SỬA: Bind sự kiện để gọi hàm tìm kiếm/lọc
+        self.notebook.bind("<<NotebookTabChanged>>", self.perform_filter_and_search)
 
         # --- 4. Thanh hành động ---
         action_bar = ttk.Frame(self, style="TFrame")
@@ -108,25 +113,27 @@ class TripPage(ttk.Frame):
                                         command=self.cancel_selected_trip)
         self.cancel_button.pack(side="left", padx=5)
 
-        search_entry = ttk.Entry(action_bar, width=50)
-        search_entry.pack(side="right", fill="x", expand=True)
-        search_entry.insert(0, "Tìm mã chuyến, tên khách, SĐT tài xế...")
+        # --- SỬA: Chức năng Tìm Kiếm ---
+        self.search_placeholder = "Tìm mã chuyến, tên khách, tên tài xế, biển số..."
+        self.search_entry = ttk.Entry(action_bar, width=50)
+        self.search_entry.pack(side="right", fill="x", expand=True)
+        self.search_entry.insert(0, self.search_placeholder)
+        self.search_entry.config(foreground="gray")
+
+        # Bind sự kiện cho ô tìm kiếm
+        self.search_entry.bind("<FocusIn>", self.on_search_focus_in)
+        self.search_entry.bind("<FocusOut>", self.on_search_focus_out)
+        self.search_entry.bind("<KeyRelease>", self.perform_filter_and_search)
+        # --- Kết thúc sửa ---
 
         # --- 5. Bảng Dữ Liệu (Treeview) ---
+        # (Giữ nguyên code định nghĩa cột, treeview, scrollbar...)
         table_container = ttk.Frame(self, style="TFrame")
         table_container.pack(fill="both", expand=True, pady=10)
-
-        # Cột dựa trên query JOIN của model
         columns = ("id", "customer_name", "driver_name", "license_plate", "destination", "total_cost", "status")
-
-        self.tree = ttk.Treeview(table_container,
-                                 columns=columns,
-                                 show='tree headings',
-                                 height=15)
-
+        self.tree = ttk.Treeview(table_container, columns=columns, show='tree headings', height=15)
         self.tree.heading("#0", text=" ")
         self.tree.column("#0", width=40, anchor="center")
-
         self.tree.heading("id", text="Mã Chuyến")
         self.tree.column("id", width=80, anchor="center")
         self.tree.heading("customer_name", text="Tên Khách Hàng")
@@ -138,23 +145,20 @@ class TripPage(ttk.Frame):
         self.tree.heading("destination", text="Điểm Đến")
         self.tree.column("destination", width=200)
         self.tree.heading("total_cost", text="Tổng Tiền (VND)")
-        self.tree.column("total_cost", width=120, anchor="e")  # Căn lề phải
+        self.tree.column("total_cost", width=120, anchor="e")
         self.tree.heading("status", text="Trạng Thái")
         self.tree.column("status", width=120, anchor="center")
-
         scrollbar = ttk.Scrollbar(table_container, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscroll=scrollbar.set)
         scrollbar.pack(side="right", fill="y")
         self.tree.pack(fill="both", expand=True)
-
-        # Cấu hình Tags màu
-        self.tree.tag_configure('hoanthanh', foreground='#28a745')  # Green
-        self.tree.tag_configure('dangdienra', foreground='#fd7e14')  # Orange
-        self.tree.tag_configure('dahuy', foreground='#dc3545')  # Red
-
+        self.tree.tag_configure('hoanthanh', foreground='#28a745')
+        self.tree.tag_configure('dangdienra', foreground='#fd7e14')
+        self.tree.tag_configure('dahuy', foreground='#dc3545')
         self.tree.bind("<<TreeviewSelect>>", self.on_tree_select)
         self.bind("<Button-1>", self.deselect_tree)
         action_bar.bind("<Button-1>", self.deselect_tree)
+        # --- Kết thúc Treeview ---
 
         # --- 6. Phân trang ---
         pagination_frame = ttk.Frame(self, style="TFrame")
@@ -163,8 +167,49 @@ class TripPage(ttk.Frame):
         self.pagination_label.pack(side="left")
 
         # --- 7. Tải dữ liệu lần đầu ---
-        self.load_stats()
-        self.load_data_into_tree(filter_status=None)
+        self.refresh_data()  # SỬA: Gọi hàm refresh_data()
+
+    # === HÀM MỚI: Xử lý Placeholder cho ô tìm kiếm ===
+    def on_search_focus_in(self, event):
+        if self.search_entry.get() == self.search_placeholder:
+            self.search_entry.delete(0, "end")
+            self.search_entry.config(foreground="black")
+
+    def on_search_focus_out(self, event):
+        if not self.search_entry.get():
+            self.search_entry.insert(0, self.search_placeholder)
+            self.search_entry.config(foreground="gray")
+
+    # === HÀM MỚI: Hàm tổng hợp tìm kiếm và lọc ===
+    def perform_filter_and_search(self, event=None):
+        search_term = self.search_entry.get()
+        if search_term == self.search_placeholder:
+            search_term = ""
+
+        selected_tab_text = self.notebook.tab(self.notebook.select(), "text").strip()
+        filter_status = None
+        if selected_tab_text == "Hoàn thành":
+            filter_status = "Hoàn thành"
+        elif selected_tab_text == "Đang diễn ra":
+            filter_status = "Đang diễn ra"
+        elif selected_tab_text == "Đã hủy":
+            filter_status = "Đã hủy"
+
+        self.load_data_into_tree(filter_status=filter_status, search_term=search_term)
+
+    # === HÀM MỚI: Dùng để làm mới từ bên ngoài ===
+    def refresh_data(self):
+        """
+        Hàm public mà file app.py chính sẽ gọi mỗi khi trang này được hiển thị.
+        """
+        print("Đang làm mới dữ liệu TripPage...")
+        self.load_stats()  # Tải các thẻ thống kê
+
+        self.search_entry.delete(0, "end")
+        self.on_search_focus_out(None)
+        self.notebook.select(0)  # Chọn tab "Tất Cả"
+        self.load_data_into_tree(filter_status=None, search_term="")  # Tải lại bảng
+        self.tree.selection_set()  # Bỏ chọn
 
     def load_stats(self):
         """Tải số liệu thống kê từ model và cập nhật các card."""
@@ -180,19 +225,11 @@ class TripPage(ttk.Frame):
 
     def on_tab_selected(self, event):
         """Được gọi khi người dùng nhấp vào một tab"""
-        selected_tab_text = event.widget.tab(event.widget.select(), "text").strip()
-        self.tree.selection_set()
+        # SỬA: Hàm này giờ chỉ cần gọi hàm tổng
+        self.perform_filter_and_search(event)
 
-        if selected_tab_text == "Tất Cả":
-            self.load_data_into_tree(filter_status=None)
-        elif selected_tab_text == "Hoàn thành":
-            self.load_data_into_tree(filter_status="Hoàn thành")
-        elif selected_tab_text == "Đang diễn ra":
-            self.load_data_into_tree(filter_status="Đang diễn ra")
-        elif selected_tab_text == "Đã hủy":
-            self.load_data_into_tree(filter_status="Đã hủy")
-
-    def load_data_into_tree(self, filter_status=None):
+    # SỬA: load_data_into_tree giờ nhận cả search_term
+    def load_data_into_tree(self, filter_status=None, search_term=None):
         """Xóa bảng và tải lại dữ liệu dựa trên trạng thái lọc"""
         for item in self.tree.get_children():
             self.tree.delete(item)
@@ -200,8 +237,12 @@ class TripPage(ttk.Frame):
         if not self.db_model:
             return
 
+        if search_term == self.search_placeholder:
+            search_term = None
+
         try:
-            trip_data = self.db_model.get_all_trips_for_view(status=filter_status)
+            # SỬA: Truyền cả hai tham số cho model
+            trip_data = self.db_model.get_all_trips_for_view(status=filter_status, search=search_term)
         except Exception as e:
             print(f"Lỗi khi lấy dữ liệu chuyến xe: {e}")
             trip_data = []
@@ -214,15 +255,10 @@ class TripPage(ttk.Frame):
 
         count = 0
         for item in trip_data:
-            # item là tuple: (id, ten_kh, ten_tx, bien_so, diem_den, tong_tien, trang_thai)
-
-            # Định dạng lại tiền tệ
             formatted_item = list(item)
-            formatted_item[5] = f"{item[5]:,.0f}"  # Cột tổng tiền
-
+            formatted_item[5] = f"{item[5]:,.0f}"
             status_value = item[-1]
             status_tag = tag_map.get(status_value, "")
-
             self.tree.insert("", "end", values=formatted_item, tags=(status_tag,))
             count += 1
 
@@ -238,10 +274,10 @@ class TripPage(ttk.Frame):
 
         self.details_button.config(state="enabled")
 
-        # Chỉ cho phép Hủy nếu chuyến "Đang diễn ra"
         item = self.tree.item(selected[0])
-        status = item['values'][-1]  # Lấy trạng thái
+        status = item['values'][-1]
 
+        # SỬA: Đảm bảo trạng thái là chuỗi "Đang diễn ra"
         if status == "Đang diễn ra":
             self.cancel_button.config(state="enabled")
         else:
@@ -256,19 +292,16 @@ class TripPage(ttk.Frame):
     def open_details_modal(self):
         """Mở cửa sổ Toplevel để XEM CHI TIẾT chuyến đi."""
         selected = self.tree.selection()
-        if not selected:
-            return
+        if not selected: return
 
         item = self.tree.item(selected[0])
-        trip_id = item['values'][0]  # Mã Chuyến
+        trip_id = item['values'][0]
 
         if not self.db_model:
             messagebox.showerror("Lỗi", "Model chưa kết nối.")
             return
 
-        # Lấy chi tiết đầy đủ từ model
         details = self.db_model.get_trip_details(trip_id)
-
         if details:
             ViewTripModal(self, details)
         else:
@@ -277,8 +310,7 @@ class TripPage(ttk.Frame):
     def cancel_selected_trip(self):
         """Hủy chuyến xe đang được chọn (nếu đang diễn ra)."""
         selected = self.tree.selection()
-        if not selected:
-            return
+        if not selected: return
 
         item = self.tree.item(selected[0])
         trip_id = item['values'][0]
@@ -292,38 +324,29 @@ class TripPage(ttk.Frame):
             success = self.db_model.update_trip_status(trip_id, "Đã hủy")
             if success:
                 messagebox.showinfo("Thành công", f"Đã hủy chuyến xe {trip_id}.")
-                self.load_data_into_tree(filter_status="Đang diễn ra")  # Tải lại tab hiện tại
-                self.load_stats()  # Cập nhật lại thẻ thống kê
+                # SỬA: Gọi hàm lọc tổng hợp để tải lại tab hiện tại
+                self.perform_filter_and_search()
+                self.load_stats()
             else:
                 messagebox.showerror("Lỗi", "Không thể hủy chuyến xe (có thể chuyến đã kết thúc).")
 
 
-# ===================================================================
-# === LỚP MODAL: XEM CHI TIẾT (VIEW-ONLY) ===
-# ===================================================================
+# (Các lớp ViewTripModal giữ nguyên)
+# (Vui lòng giữ nguyên code của class này)
 class ViewTripModal(tk.Toplevel):
     def __init__(self, parent, details_tuple):
         super().__init__(parent)
 
         # Chuyển tuple sang dict cho dễ đọc code
-        # Dựa trên query: SELECT c.*, kh.ho_ten, kh.sdt, tx.ho_ten, tx.sdt
         details = {
-            "id_chuyen_xe": details_tuple[0],
-            "id_khach_hang": details_tuple[1],
-            "ma_tai_xe": details_tuple[2],
-            "bien_so_xe": details_tuple[3],
-            "diem_don": details_tuple[4],
-            "diem_den": details_tuple[5],
-            "so_km": details_tuple[6],
-            "thoi_gian_dat_xe": details_tuple[7],
-            "thoi_gian_ket_thuc": details_tuple[8],
-            "tong_tien": details_tuple[9],
-            "phuong_thuc_thanh_toan": details_tuple[10],
-            "trang_thai_chuyen_xe": details_tuple[11],
-            "danh_gia_chuyen_xe": details_tuple[12],
-            "ten_khach_hang": details_tuple[13],
-            "sdt_khach_hang": details_tuple[14],
-            "ten_tai_xe": details_tuple[15],
+            "id_chuyen_xe": details_tuple[0], "id_khach_hang": details_tuple[1],
+            "ma_tai_xe": details_tuple[2], "bien_so_xe": details_tuple[3],
+            "diem_don": details_tuple[4], "diem_den": details_tuple[5],
+            "so_km": details_tuple[6], "thoi_gian_dat_xe": details_tuple[7],
+            "thoi_gian_ket_thuc": details_tuple[8], "tong_tien": details_tuple[9],
+            "phuong_thuc_thanh_toan": details_tuple[10], "trang_thai_chuyen_xe": details_tuple[11],
+            "danh_gia_chuyen_xe": details_tuple[12], "ten_khach_hang": details_tuple[13],
+            "sdt_khach_hang": details_tuple[14], "ten_tai_xe": details_tuple[15],
             "sdt_tai_xe": details_tuple[16],
         }
 
@@ -341,7 +364,6 @@ class ViewTripModal(tk.Toplevel):
         ttk.Label(header_frame, text=f"Chi Tiết Chuyến Xe #{details['id_chuyen_xe']}", font=("Arial", 16, "bold"),
                   foreground=COLOR_PRIMARY_TEAL).pack(anchor="w")
 
-        # Thêm trạng thái
         status = details['trang_thai_chuyen_xe']
         if status == "Hoàn thành":
             style = "success"
@@ -366,27 +388,21 @@ class ViewTripModal(tk.Toplevel):
         form_frame.columnconfigure(1, weight=1)
         form_frame.columnconfigure(3, weight=1)
 
-        # Hàm helper để tạo label
         def create_detail_entry(label, value, row, col):
             ttk.Label(form_frame, text=label, font=("Arial", 10, "bold")).grid(row=row, column=col, sticky="w",
                                                                                padx=(0, 10))
-
-            # Dùng Label thay vì Entry vì đây là view-only
             val_label = ttk.Label(form_frame, text=value, font=("Arial", 11), style='light', wraplength=300)
             val_label.grid(row=row + 1, column=col, columnspan=2, sticky="w", pady=(2, 10))
 
-        # --- CỘT 1: THÔNG TIN KHÁCH HÀNG & TÀI XẾ ---
         create_detail_entry("Khách Hàng:", f"{details['ten_khach_hang']} ({details['sdt_khach_hang']})", 0, 0)
         create_detail_entry("Tài Xế:", f"{details['ten_tai_xe']} ({details['sdt_tai_xe']})", 2, 0)
         create_detail_entry("Biển Số Xe:", details['bien_so_xe'], 4, 0)
 
-        # --- CỘT 2: THÔNG TIN TÀI CHÍNH ---
         create_detail_entry("Tổng Tiền:", f"{details['tong_tien']:,.0f} VND", 0, 2)
         create_detail_entry("Thanh Toán:", details['phuong_thuc_thanh_toan'], 2, 2)
         create_detail_entry("Đánh Giá:", f"{details['danh_gia_chuyen_xe']} sao" if details[
             'danh_gia_chuyen_xe'] else "Chưa đánh giá", 4, 2)
 
-        # --- HÀNG 3: ĐỊA ĐIỂM (Full width) ---
         ttk.Label(form_frame, text="Điểm Đón", font=("Arial", 10, "bold")).grid(row=6, column=0, columnspan=4,
                                                                                 sticky="w", pady=(10, 0))
         ttk.Label(form_frame, text=details['diem_don'], font=("Arial", 11), style='light', wraplength=600).grid(row=7,
@@ -395,7 +411,6 @@ class ViewTripModal(tk.Toplevel):
                                                                                                                 sticky="w",
                                                                                                                 pady=(2,
                                                                                                                       10))
-
         ttk.Label(form_frame, text="Điểm Đến", font=("Arial", 10, "bold")).grid(row=8, column=0, columnspan=4,
                                                                                 sticky="w", pady=(10, 0))
         ttk.Label(form_frame, text=details['diem_den'], font=("Arial", 11), style='light', wraplength=600).grid(row=9,
@@ -404,7 +419,5 @@ class ViewTripModal(tk.Toplevel):
                                                                                                                 sticky="w",
                                                                                                                 pady=(2,
                                                                                                                       10))
-
-        # --- HÀNG 4: THỜI GIAN (Tách 2 cột) ---
         create_detail_entry("Thời Gian Đặt:", details['thoi_gian_dat_xe'], 10, 0)
         create_detail_entry("Thời Gian Kết Thúc:", details['thoi_gian_ket_thuc'] or "Chưa kết thúc", 10, 2)

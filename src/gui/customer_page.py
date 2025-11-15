@@ -55,37 +55,36 @@ class CustomerPage(ttk.Frame):
         card1 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card1.pack(side="left", fill="x", expand=True, padx=(0, 10))
         ttk.Label(card1, text="Tổng Số Khách Hàng", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
-        # SỬA: Gán Label cho 'self' để cập nhật
+        # SỬA: Bỏ 'foreground' để dùng màu đen mặc định
         self.total_label = ttk.Label(card1, text="Đang tải...", font=("Arial", 22, "bold"),
-                                     style="light.TLabel", foreground=COLOR_PRIMARY_TEAL)
+                                     style="light.TLabel")
         self.total_label.pack(anchor="w", pady=5)
-        self.total_sublabel = ttk.Label(card1, text=" ", bootstyle="success")  # Để trống
+        self.total_sublabel = ttk.Label(card1, text=" ", bootstyle="success")
         self.total_sublabel.pack(anchor="w")
 
         # Card 2: Khách Hàng VIP
         card2 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card2.pack(side="left", fill="x", expand=True, padx=10)
         ttk.Label(card2, text="Khách Hàng VIP", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
-        # SỬA: Gán Label cho 'self'
+        # SỬA: Bỏ 'foreground' để dùng màu đen mặc định
         self.vip_label = ttk.Label(card2, text="Đang tải...", font=("Arial", 22, "bold"),
-                                   style="light.TLabel", foreground=COLOR_PRIMARY_TEAL)
+                                   style="light.TLabel")
         self.vip_label.pack(anchor="w", pady=5)
-        self.vip_sublabel = ttk.Label(card2, text=" ", bootstyle="info")  # Để trống
+        self.vip_sublabel = ttk.Label(card2, text=" ", bootstyle="info")
         self.vip_sublabel.pack(anchor="w")
 
         # Card 3: Khách Hàng Bạc
         card3 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card3.pack(side="left", fill="x", expand=True, padx=(10, 0))
         ttk.Label(card3, text="Khách Hàng Bạc", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
-        # SỬA: Gán Label cho 'self'
+        # SỬA: Bỏ 'foreground' để dùng màu đen mặc định
         self.silver_label = ttk.Label(card3, text="Đang tải...", font=("Arial", 22, "bold"),
-                                      style="light.TLabel", foreground=COLOR_PRIMARY_TEAL)
+                                      style="light.TLabel")
         self.silver_label.pack(anchor="w", pady=5)
-        self.silver_sublabel = ttk.Label(card3, text=" ", bootstyle="info")  # Để trống
+        self.silver_sublabel = ttk.Label(card3, text=" ", bootstyle="info")
         self.silver_sublabel.pack(anchor="w")
 
         # --- 3. Notebook (Tabs) ---
-        # SỬA: Gán notebook cho self để có thể reset tab
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill="x", pady=10)
 
@@ -99,7 +98,8 @@ class CustomerPage(ttk.Frame):
         self.notebook.add(tab_silver, text="  Bạc  ")
         self.notebook.add(tab_bronze, text="  Đồng  ")
 
-        self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_selected)
+        # SỬA: Bind sự kiện để gọi hàm tìm kiếm/lọc
+        self.notebook.bind("<<NotebookTabChanged>>", self.perform_filter_and_search)
 
         # --- 4. Thanh hành động ---
         action_bar = ttk.Frame(self, style="TFrame")
@@ -117,9 +117,18 @@ class CustomerPage(ttk.Frame):
                                         command=self.delete_selected_customer)
         self.delete_button.pack(side="left", padx=5)
 
-        search_entry = ttk.Entry(action_bar, width=50)
-        search_entry.pack(side="right", fill="x", expand=True)
-        search_entry.insert(0, "Tìm theo mã KH, tên, SĐT...")
+        # --- SỬA: Chức năng Tìm Kiếm ---
+        self.search_placeholder = "Tìm theo mã KH, tên, SĐT..."
+        self.search_entry = ttk.Entry(action_bar, width=50)
+        self.search_entry.pack(side="right", fill="x", expand=True)
+        self.search_entry.insert(0, self.search_placeholder)
+        self.search_entry.config(foreground="gray")
+
+        # Bind sự kiện cho ô tìm kiếm
+        self.search_entry.bind("<FocusIn>", self.on_search_focus_in)
+        self.search_entry.bind("<FocusOut>", self.on_search_focus_out)
+        self.search_entry.bind("<KeyRelease>", self.perform_filter_and_search)
+        # --- Kết thúc sửa ---
 
         # --- 5. Bảng Dữ Liệu (Treeview) ---
         table_container = ttk.Frame(self, style="TFrame")
@@ -131,10 +140,9 @@ class CustomerPage(ttk.Frame):
                                  columns=columns,
                                  show='tree headings',
                                  height=15)
-
+        # (Giữ nguyên code định nghĩa cột... )
         self.tree.heading("#0", text=" ")
         self.tree.column("#0", width=50, anchor="center")
-
         self.tree.heading("id", text="Mã Khách Hàng")
         self.tree.column("id", width=120, anchor="center")
         self.tree.heading("name", text="Họ Tên")
@@ -150,43 +158,74 @@ class CustomerPage(ttk.Frame):
         self.tree.configure(yscroll=scrollbar.set)
         scrollbar.pack(side="right", fill="y")
         self.tree.pack(fill="both", expand=True)
-
-        # Tags màu sắc
-        self.tree.tag_configure('vip', foreground='#fd7e14')  # Cam
-        self.tree.tag_configure('bac', foreground='#6c757d')  # Xám
-        self.tree.tag_configure('dong', foreground='#17a2b8')  # Xanh lơ
-
+        self.tree.tag_configure('vip', foreground='#fd7e14')
+        self.tree.tag_configure('bac', foreground='#6c757d')
+        self.tree.tag_configure('dong', foreground='#17a2b8')
         self.tree.bind("<<TreeviewSelect>>", self.on_tree_select)
         self.bind("<Button-1>", self.deselect_tree)
         action_bar.bind("<Button-1>", self.deselect_tree)
+        # --- Kết thúc Treeview ---
 
         # --- 6. Phân trang ---
         pagination_frame = ttk.Frame(self, style="TFrame")
         pagination_frame.pack(fill="x", pady=(10, 0))
         self.pagination_label = ttk.Label(pagination_frame, text="Đang tải...", style="secondary.TLabel")
         self.pagination_label.pack(side="left")
+
+        # Tải dữ liệu lần đầu
         self.refresh_data()
-        # SỬA: Không tải dữ liệu ở đây, để hàm refresh_data() xử lý
-        # self.load_data_into_tree(filter_status=None)
+
+    # === HÀM MỚI: Xử lý Placeholder cho ô tìm kiếm ===
+    def on_search_focus_in(self, event):
+        """Xóa placeholder khi người dùng nhấp vào ô tìm kiếm."""
+        if self.search_entry.get() == self.search_placeholder:
+            self.search_entry.delete(0, "end")
+            self.search_entry.config(foreground="black")
+
+    def on_search_focus_out(self, event):
+        """Hiện lại placeholder nếu ô tìm kiếm trống."""
+        if not self.search_entry.get():
+            self.search_entry.insert(0, self.search_placeholder)
+            self.search_entry.config(foreground="gray")
+
+    # === HÀM MỚI: Hàm tổng hợp tìm kiếm và lọc ===
+    def perform_filter_and_search(self, event=None):
+        """
+        Được gọi khi người dùng gõ tìm kiếm HOẶC đổi tab.
+        Hàm này đọc cả hai giá trị và tải lại bảng.
+        """
+        # 1. Lấy giá trị tìm kiếm
+        search_term = self.search_entry.get()
+        if search_term == self.search_placeholder:
+            search_term = ""  # Không tìm kiếm nếu chỉ là placeholder
+
+        # 2. Lấy giá trị tab (Hạng)
+        selected_tab_text = self.notebook.tab(self.notebook.select(), "text").strip()
+        filter_status = None
+        if selected_tab_text == "VIP":
+            filter_status = "VIP"
+        elif selected_tab_text == "Bạc":
+            filter_status = "Bạc"
+        elif selected_tab_text == "Đồng":
+            filter_status = "Đồng"
+
+        # 3. Tải lại dữ liệu với cả hai filter
+        self.load_data_into_tree(filter_status=filter_status, search_term=search_term)
 
     # === HÀM MỚI: Tải số liệu thống kê ===
     def load_stats(self):
         if not self.db_model:
             return
         try:
-            # 1. Gọi model (Giả định model có hàm get_customer_stats())
             stats = self.db_model.get_customer_stats()
-
             total = stats.get('total', 0)
             vip = stats.get('vip', 0)
             silver = stats.get('silver', 0)
 
-            # 2. Cập nhật các Label chính
             self.total_label.config(text=f"{total:,.0f}")
             self.vip_label.config(text=f"{vip:,.0f}")
             self.silver_label.config(text=f"{silver:,.0f}")
 
-            # 3. Cập nhật các Label phụ (tính %)
             vip_percent = (vip / total * 100) if total > 0 else 0
             silver_percent = (silver / total * 100) if total > 0 else 0
 
@@ -208,22 +247,22 @@ class CustomerPage(ttk.Frame):
         print("Đang làm mới dữ liệu CustomerPage...")
         self.load_stats()  # Tải các thẻ thống kê
 
-        # Tải lại bảng với tab "Tất Cả"
+        # SỬA: Reset ô tìm kiếm và tải lại bảng
+        self.search_entry.delete(0, "end")
+        self.on_search_focus_out(None)  # Đặt lại placeholder
         self.notebook.select(0)  # Chọn tab "Tất Cả"
-        self.load_data_into_tree(filter_status=None)
+        self.load_data_into_tree(filter_status=None, search_term="")  # Tải lại bảng
         self.tree.selection_set()  # Bỏ chọn bất kỳ dòng nào
 
     def open_add_customer_modal(self):
         if self.db_model:
-            # SỬA: Gọi refresh_data() sau khi thêm
             AddCustomerModal(self, self.db_model, callback=self.refresh_data)
         else:
             messagebox.showerror("Lỗi", "Model chưa kết nối.")
 
     def delete_selected_customer(self):
         selected = self.tree.selection()
-        if not selected:
-            return
+        if not selected: return
 
         item = self.tree.item(selected[0])
         customer_code = item['values'][0]
@@ -233,43 +272,36 @@ class CustomerPage(ttk.Frame):
             success = self.db_model.delete_customer(customer_code)
             if success:
                 messagebox.showinfo("Thành công", "Đã xóa khách hàng.")
-                self.refresh_data()  # SỬA: Gọi refresh_data() sau khi xóa
+                self.refresh_data()
             else:
                 messagebox.showerror("Lỗi", "Không thể xóa khách hàng.")
 
     def open_edit_customer_modal(self):
         selected = self.tree.selection()
-        if not selected:
-            return
-
+        if not selected: return
         item = self.tree.item(selected[0])
         customer_code = item['values'][0]
-
-        # SỬA: Gọi refresh_data() sau khi sửa
         EditCustomerModal(self, self.db_model, customer_code, callback=self.refresh_data)
 
     def on_tab_selected(self, event):
-        selected_tab_text = event.widget.tab(event.widget.select(), "text").strip()
-        self.tree.selection_set()
+        # SỬA: Hàm này giờ chỉ cần gọi hàm tổng
+        self.perform_filter_and_search(event)
 
-        if selected_tab_text == "Tất Cả":
-            self.load_data_into_tree(filter_status=None)
-        elif selected_tab_text == "VIP":
-            self.load_data_into_tree(filter_status="VIP")
-        elif selected_tab_text == "Bạc":
-            self.load_data_into_tree(filter_status="Bạc")
-        elif selected_tab_text == "Đồng":
-            self.load_data_into_tree(filter_status="Đồng")
-
-    def load_data_into_tree(self, filter_status=None):
+    # SỬA: load_data_into_tree giờ nhận cả search_term
+    def load_data_into_tree(self, filter_status=None, search_term=None):
         for item in self.tree.get_children():
             self.tree.delete(item)
 
         if not self.db_model:
             return
 
+        # Xử lý nếu search_term là placeholder
+        if search_term == self.search_placeholder:
+            search_term = None
+
         try:
-            customer_data = self.db_model.get_all_customers(rank=filter_status)
+            # SỬA: Truyền cả hai tham số cho model
+            customer_data = self.db_model.get_all_customers(rank=filter_status, search=search_term)
         except Exception as e:
             print(f"Lỗi data: {e}")
             customer_data = []
@@ -277,7 +309,7 @@ class CustomerPage(ttk.Frame):
         tag_map = {"VIP": "vip", "Bạc": "bac", "Đồng": "dong"}
         count = 0
         for item in customer_data:
-            status_value = item[-1]  # Cột Rank nằm cuối
+            status_value = item[-1]
             status_tag = tag_map.get(status_value, "")
             self.tree.insert("", "end", values=item, tags=(status_tag,))
             count += 1
@@ -298,6 +330,8 @@ class CustomerPage(ttk.Frame):
                 self.tree.selection_set()
 
 
+# (Các lớp AddCustomerModal và EditCustomerModal giữ nguyên)
+# (Vui lòng giữ nguyên code của 2 class này)
 class AddCustomerModal(tk.Toplevel):
     def __init__(self, parent, db_model, callback=None):
         tk.Toplevel.__init__(self, parent)
@@ -386,6 +420,8 @@ class EditCustomerModal(tk.Toplevel):
         ttk.Label(main_frame, text="Sửa Thông Tin", font=("Arial", 16, "bold"),
                   foreground=COLOR_PRIMARY_TEAL).pack(pady=(0, 10))
 
+        # SỬA: Dùng hàm get_customer_by_id (cần được tạo trong model)
+        # Nếu không có, dùng get_all_customers() là OK, nhưng chậm hơn
         all_data = self.db_model.get_all_customers()
         customer_data = next((d for d in all_data if d[0] == customer_code), None)
 
