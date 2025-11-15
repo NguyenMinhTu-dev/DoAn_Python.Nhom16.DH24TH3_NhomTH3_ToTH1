@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8747d704-f226-4f97-a3e3-89b0df8fe83b" name="Changes" comment="&quot;update3&quot;">
+    <list default="true" id="8747d704-f226-4f97-a3e3-89b0df8fe83b" name="Changes" comment="&quot;update4&quot;">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/customer_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/customer_page.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/driver_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/driver_page.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/vehicle_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/vehicle_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/driver_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/driver_model.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -528,7 +527,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763184607606</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="&quot;update4&quot;">
+      <option name="closed" value="true" />
+      <created>1763185306285</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1763185306285</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -579,6 +586,7 @@
     <MESSAGE value="&quot;update&quot;" />
     <MESSAGE value="&quot;update2&quot;" />
     <MESSAGE value="&quot;update3&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="&quot;update3&quot;" />
+    <MESSAGE value="&quot;update4&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="&quot;update4&quot;" />
   </component>
 </project>

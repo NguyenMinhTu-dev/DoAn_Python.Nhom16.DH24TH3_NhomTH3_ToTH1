@@ -101,41 +101,34 @@ class DriverModel:
             if db:
                 db.close()
 
+        # (Đây là code để bạn thay thế trong models/driver_model.py)
     def add_driver(self, data):
-        """
-        Thêm một tài xế mới vào CSDL.
-        data là một dictionary chứa thông tin tài xế.
-        """
-        db = None
-        try:
-            db = Database()
-
-            # Tạm thời bỏ qua `ma_tai_xe` vì CSDL không có auto-increment cho cột này.
-            # CSDL cần phải có logic tạo mã (hoặc bạn tự tạo mã TX00X).
-
-            query = """
-                INSERT INTO `TaiXe` 
-                (`ho_ten`, `email`, `so_dien_thoai`, `hang_xe_lai`, `so_bang_lai`, `trang_thai`)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """
-            params = (
-                data['name'],
-                data['email'],
-                data['phone'],
-                data['vehicle_category'],
-                data['license'],
-                data['status']
-            )
-
-            db.execute_query(query, params)
-            return True
-
-        except mysql.connector.Error as err:
-            messagebox.showerror("Lỗi Thêm Mới", f"Không thể thêm Tài xế:\n{err}")
-            return False
-        finally:
-            if db:
-                db.close()
+            """Thêm tài xế mới (với mã tài xế)."""
+            db = None
+            try:
+                db = Database()
+                query = """
+                    INSERT INTO TaiXe 
+                    (ma_tai_xe, ho_ten, email, so_dien_thoai, hang_xe_lai, so_bang_lai, trang_thai) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """
+                params = (
+                    data['driver_code'],  # <-- THÊM THAM SỐ NÀY
+                    data['name'],
+                    data['email'],
+                    data['phone'],
+                    data['vehicle_category'],
+                    data['license'],
+                    data['status']
+                )
+                db.execute_query(query, params)
+                return True
+            except mysql.connector.Error as err:
+                print(f"Lỗi khi thêm tài xế: {err}")
+                return False
+            finally:
+                if db:
+                    db.close()
 
     def update_driver(self, driver_code, data):
         """

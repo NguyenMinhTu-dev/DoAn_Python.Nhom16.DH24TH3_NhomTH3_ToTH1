@@ -372,42 +372,51 @@ class AddDriverModal(tk.Toplevel):
 
         form_frame.columnconfigure(1, weight=1)
 
-        # 1. Họ Tên
-        ttk.Label(form_frame, text="Họ Tên", font=("Arial", 10, "bold")).grid(row=0, column=0, columnspan=2, sticky="w",
+        # === THÊM 4 DÒNG NÀY ===
+        ttk.Label(form_frame, text="Mã Tài Xế", font=("Arial", 10, "bold")).grid(row=0, column=0, columnspan=2,
+                                                                                 sticky="w",
+                                                                                 pady=(10, 0))
+        self.driver_code_entry = ttk.Entry(form_frame, font=("Arial", 12))
+        self.driver_code_entry.grid(row=1, column=0, columnspan=2, sticky="ew", padx=(0, 10), ipady=5)
+        # ==========================
+
+        # 1. Họ Tên (Sửa row=0 thành row=2, row=1 thành row=3)
+        ttk.Label(form_frame, text="Họ Tên", font=("Arial", 10, "bold")).grid(row=2, column=0, columnspan=2, sticky="w",
                                                                               pady=(10, 0))
         self.name_entry = ttk.Entry(form_frame, font=("Arial", 12))
-        self.name_entry.grid(row=1, column=0, columnspan=2, sticky="ew", padx=(0, 10), ipady=5)
+        self.name_entry.grid(row=3, column=0, columnspan=2, sticky="ew", padx=(0, 10), ipady=5)
 
-        # 2. Email (Left)
-        ttk.Label(form_frame, text="Email", font=("Arial", 10, "bold")).grid(row=2, column=0, sticky="w", pady=(10, 0))
+        # 2. Email (Sửa row=2 thành row=4, row=3 thành row=5)
+        ttk.Label(form_frame, text="Email", font=("Arial", 10, "bold")).grid(row=4, column=0, sticky="w", pady=(10, 0))
         self.email_entry = ttk.Entry(form_frame, font=("Arial", 12))
-        self.email_entry.grid(row=3, column=0, sticky="ew", padx=(0, 10), ipady=5)
+        self.email_entry.grid(row=5, column=0, sticky="ew", padx=(0, 10), ipady=5)
 
-        # 3. Số Điện Thoại (Right)
-        ttk.Label(form_frame, text="Số Điện Thoại", font=("Arial", 10, "bold")).grid(row=2, column=1, sticky="w",
+        # (Sửa tất cả các 'row' tiếp theo, tăng lên 2 đơn vị)
+        # 3. Số Điện Thoại (row=4, row=5)
+        ttk.Label(form_frame, text="Số Điện Thoại", font=("Arial", 10, "bold")).grid(row=4, column=1, sticky="w",
                                                                                      pady=(10, 0))
         self.phone_entry = ttk.Entry(form_frame, font=("Arial", 12))
-        self.phone_entry.grid(row=3, column=1, sticky="ew", padx=(10, 0), ipady=5)
+        self.phone_entry.grid(row=5, column=1, sticky="ew", padx=(10, 0), ipady=5)
 
-        # 4. Hạng Xe Lái (Left - Combobox)
-        ttk.Label(form_frame, text="Hạng Xe Lái", font=("Arial", 10, "bold")).grid(row=4, column=0, sticky="w",
+        # 4. Hạng Xe Lái (row=6, row=7)
+        ttk.Label(form_frame, text="Hạng Xe Lái", font=("Arial", 10, "bold")).grid(row=6, column=0, sticky="w",
                                                                                    pady=(10, 0))
         self.vehicle_combo = ttk.Combobox(form_frame, values=["Xe 4 Chỗ", "Xe 7 Chỗ", "Xe Bán Tải"], state="readonly")
         self.vehicle_combo.set("Xe 4 Chỗ")
-        self.vehicle_combo.grid(row=5, column=0, sticky="ew", padx=(0, 10), ipady=5)
+        self.vehicle_combo.grid(row=7, column=0, sticky="ew", padx=(0, 10), ipady=5)
 
-        # 5. Số Bằng Lái (Right)
-        ttk.Label(form_frame, text="Số Bằng Lái", font=("Arial", 10, "bold")).grid(row=4, column=1, sticky="w",
+        # 5. Số Bằng Lái (row=6, row=7)
+        ttk.Label(form_frame, text="Số Bằng Lái", font=("Arial", 10, "bold")).grid(row=6, column=1, sticky="w",
                                                                                    pady=(10, 0))
         self.license_entry = ttk.Entry(form_frame, font=("Arial", 12))
-        self.license_entry.grid(row=5, column=1, sticky="ew", padx=(10, 0), ipady=5)
+        self.license_entry.grid(row=7, column=1, sticky="ew", padx=(10, 0), ipady=5)
 
-        # 6. Trạng Thái (Full width)
-        ttk.Label(form_frame, text="Trạng Thái", font=("Arial", 10, "bold")).grid(row=6, column=0, columnspan=2,
+        # 6. Trạng Thái (row=8, row=9)
+        ttk.Label(form_frame, text="Trạng Thái", font=("Arial", 10, "bold")).grid(row=8, column=0, columnspan=2,
                                                                                   sticky="w", pady=(10, 0))
         self.status_combo = ttk.Combobox(form_frame, values=["Hoạt động", "Tạm ngưng", "Chờ duyệt"], state="readonly")
         self.status_combo.set("Chờ duyệt")
-        self.status_combo.grid(row=7, column=0, columnspan=2, sticky="ew", padx=(0, 10), ipady=5)
+        self.status_combo.grid(row=9, column=0, columnspan=2, sticky="ew", padx=(0, 10), ipady=5)
 
         form_frame.grid_columnconfigure(0, weight=1)
         form_frame.grid_columnconfigure(1, weight=1)
@@ -415,6 +424,7 @@ class AddDriverModal(tk.Toplevel):
     def save_driver(self):
         # 1. Lấy dữ liệu
         data = {
+            'driver_code': self.driver_code_entry.get(),  # <-- THÊM DÒNG NÀY
             'name': self.name_entry.get(),
             'email': self.email_entry.get(),
             'phone': self.phone_entry.get(),
@@ -423,10 +433,10 @@ class AddDriverModal(tk.Toplevel):
             'status': self.status_combo.get()
         }
 
-        if not all(data.values()):
-            messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ thông tin.")
+        # Sửa: Kiểm tra driver_code và name/phone
+        if not data['driver_code'] or not data['name'] or not data['phone']:
+            messagebox.showerror("Lỗi", "Vui lòng nhập Mã Tài Xế, Họ Tên và SĐT.")
             return
-
         # 2. Gọi hàm thêm trong Model
         success = self.db_model.add_driver(data)
 
