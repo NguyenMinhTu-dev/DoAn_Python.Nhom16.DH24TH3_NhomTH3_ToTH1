@@ -47,46 +47,59 @@ class CustomerPage(ttk.Frame):
                                 command=self.open_add_customer_modal)
         add_button.pack(side="right", anchor="ne", pady=10)
 
-        # --- 2. Hàng Thống Kê ---
+        # --- 2. Hàng Thống Kê (SỬA ĐỔI) ---
         stat_frame = ttk.Frame(self, style="TFrame")
         stat_frame.pack(fill="x", expand=True, pady=10)
 
+        # Card 1: Tổng Số Khách Hàng
         card1 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card1.pack(side="left", fill="x", expand=True, padx=(0, 10))
         ttk.Label(card1, text="Tổng Số Khách Hàng", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
-        ttk.Label(card1, text="1.234", font=("Arial", 22, "bold"),
-                  style="light.TLabel", foreground=COLOR_PRIMARY_TEAL).pack(anchor="w", pady=5)
-        ttk.Label(card1, text="+160 khách mới tháng này", bootstyle="success").pack(anchor="w")
+        # SỬA: Gán Label cho 'self' để cập nhật
+        self.total_label = ttk.Label(card1, text="Đang tải...", font=("Arial", 22, "bold"),
+                                     style="light.TLabel", foreground=COLOR_PRIMARY_TEAL)
+        self.total_label.pack(anchor="w", pady=5)
+        self.total_sublabel = ttk.Label(card1, text=" ", bootstyle="success")  # Để trống
+        self.total_sublabel.pack(anchor="w")
 
+        # Card 2: Khách Hàng VIP
         card2 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card2.pack(side="left", fill="x", expand=True, padx=10)
         ttk.Label(card2, text="Khách Hàng VIP", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
-        ttk.Label(card2, text="50", font=("Arial", 22, "bold"),
-                  style="light.TLabel", foreground=COLOR_PRIMARY_TEAL).pack(anchor="w", pady=5)
-        ttk.Label(card2, text="Chiếm 4.0% tổng số", bootstyle="info").pack(anchor="w")
+        # SỬA: Gán Label cho 'self'
+        self.vip_label = ttk.Label(card2, text="Đang tải...", font=("Arial", 22, "bold"),
+                                   style="light.TLabel", foreground=COLOR_PRIMARY_TEAL)
+        self.vip_label.pack(anchor="w", pady=5)
+        self.vip_sublabel = ttk.Label(card2, text=" ", bootstyle="info")  # Để trống
+        self.vip_sublabel.pack(anchor="w")
 
+        # Card 3: Khách Hàng Bạc
         card3 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card3.pack(side="left", fill="x", expand=True, padx=(10, 0))
         ttk.Label(card3, text="Khách Hàng Bạc", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
-        ttk.Label(card3, text="300", font=("Arial", 22, "bold"),
-                  style="light.TLabel", foreground=COLOR_PRIMARY_TEAL).pack(anchor="w", pady=5)
-        ttk.Label(card3, text="Chiếm 24.3% tổng số", bootstyle="info").pack(anchor="w")
+        # SỬA: Gán Label cho 'self'
+        self.silver_label = ttk.Label(card3, text="Đang tải...", font=("Arial", 22, "bold"),
+                                      style="light.TLabel", foreground=COLOR_PRIMARY_TEAL)
+        self.silver_label.pack(anchor="w", pady=5)
+        self.silver_sublabel = ttk.Label(card3, text=" ", bootstyle="info")  # Để trống
+        self.silver_sublabel.pack(anchor="w")
 
         # --- 3. Notebook (Tabs) ---
-        notebook = ttk.Notebook(self)
-        notebook.pack(fill="x", pady=10)
+        # SỬA: Gán notebook cho self để có thể reset tab
+        self.notebook = ttk.Notebook(self)
+        self.notebook.pack(fill="x", pady=10)
 
-        tab_all = ttk.Frame(notebook)
-        tab_vip = ttk.Frame(notebook)
-        tab_silver = ttk.Frame(notebook)
-        tab_bronze = ttk.Frame(notebook)
+        tab_all = ttk.Frame(self.notebook)
+        tab_vip = ttk.Frame(self.notebook)
+        tab_silver = ttk.Frame(self.notebook)
+        tab_bronze = ttk.Frame(self.notebook)
 
-        notebook.add(tab_all, text="  Tất Cả  ")
-        notebook.add(tab_vip, text="  VIP  ")
-        notebook.add(tab_silver, text="  Bạc  ")
-        notebook.add(tab_bronze, text="  Đồng  ")
+        self.notebook.add(tab_all, text="  Tất Cả  ")
+        self.notebook.add(tab_vip, text="  VIP  ")
+        self.notebook.add(tab_silver, text="  Bạc  ")
+        self.notebook.add(tab_bronze, text="  Đồng  ")
 
-        notebook.bind("<<NotebookTabChanged>>", self.on_tab_selected)
+        self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_selected)
 
         # --- 4. Thanh hành động ---
         action_bar = ttk.Frame(self, style="TFrame")
@@ -152,13 +165,58 @@ class CustomerPage(ttk.Frame):
         pagination_frame.pack(fill="x", pady=(10, 0))
         self.pagination_label = ttk.Label(pagination_frame, text="Đang tải...", style="secondary.TLabel")
         self.pagination_label.pack(side="left")
+        self.refresh_data()
+        # SỬA: Không tải dữ liệu ở đây, để hàm refresh_data() xử lý
+        # self.load_data_into_tree(filter_status=None)
 
-        # Tải dữ liệu lần đầu
+    # === HÀM MỚI: Tải số liệu thống kê ===
+    def load_stats(self):
+        if not self.db_model:
+            return
+        try:
+            # 1. Gọi model (Giả định model có hàm get_customer_stats())
+            stats = self.db_model.get_customer_stats()
+
+            total = stats.get('total', 0)
+            vip = stats.get('vip', 0)
+            silver = stats.get('silver', 0)
+
+            # 2. Cập nhật các Label chính
+            self.total_label.config(text=f"{total:,.0f}")
+            self.vip_label.config(text=f"{vip:,.0f}")
+            self.silver_label.config(text=f"{silver:,.0f}")
+
+            # 3. Cập nhật các Label phụ (tính %)
+            vip_percent = (vip / total * 100) if total > 0 else 0
+            silver_percent = (silver / total * 100) if total > 0 else 0
+
+            self.total_sublabel.config(text="Tổng khách hàng trong hệ thống")
+            self.vip_sublabel.config(text=f"Chiếm {vip_percent:.1f}% tổng số")
+            self.silver_sublabel.config(text=f"Chiếm {silver_percent:.1f}% tổng số")
+
+        except Exception as e:
+            print(f"Lỗi khi tải số liệu khách hàng: {e}")
+            self.total_label.config(text="Lỗi")
+            self.vip_label.config(text="Lỗi")
+            self.silver_label.config(text="Lỗi")
+
+    # === HÀM MỚI: Dùng để làm mới từ bên ngoài ===
+    def refresh_data(self):
+        """
+        Hàm public mà file app.py chính sẽ gọi mỗi khi trang này được hiển thị.
+        """
+        print("Đang làm mới dữ liệu CustomerPage...")
+        self.load_stats()  # Tải các thẻ thống kê
+
+        # Tải lại bảng với tab "Tất Cả"
+        self.notebook.select(0)  # Chọn tab "Tất Cả"
         self.load_data_into_tree(filter_status=None)
+        self.tree.selection_set()  # Bỏ chọn bất kỳ dòng nào
 
     def open_add_customer_modal(self):
         if self.db_model:
-            AddCustomerModal(self, self.db_model, callback=lambda: self.load_data_into_tree())
+            # SỬA: Gọi refresh_data() sau khi thêm
+            AddCustomerModal(self, self.db_model, callback=self.refresh_data)
         else:
             messagebox.showerror("Lỗi", "Model chưa kết nối.")
 
@@ -175,7 +233,7 @@ class CustomerPage(ttk.Frame):
             success = self.db_model.delete_customer(customer_code)
             if success:
                 messagebox.showinfo("Thành công", "Đã xóa khách hàng.")
-                self.load_data_into_tree()
+                self.refresh_data()  # SỬA: Gọi refresh_data() sau khi xóa
             else:
                 messagebox.showerror("Lỗi", "Không thể xóa khách hàng.")
 
@@ -187,7 +245,8 @@ class CustomerPage(ttk.Frame):
         item = self.tree.item(selected[0])
         customer_code = item['values'][0]
 
-        EditCustomerModal(self, self.db_model, customer_code, callback=lambda: self.load_data_into_tree())
+        # SỬA: Gọi refresh_data() sau khi sửa
+        EditCustomerModal(self, self.db_model, customer_code, callback=self.refresh_data)
 
     def on_tab_selected(self, event):
         selected_tab_text = event.widget.tab(event.widget.select(), "text").strip()

@@ -146,3 +146,39 @@ class CustomerModel:
         finally:
             if db:
                 db.close()
+
+        # (Các hàm get_all_customers, add_customer, v.v. đã có ở trên)
+
+    def get_customer_stats(self):
+            """
+            Lấy số liệu thống kê cho 3 thẻ trên trang Quản lý Khách Hàng.
+            """
+            db = None
+            try:
+                db = Database()
+
+                # 1. Đếm tổng số khách hàng
+                query_total = "SELECT COUNT(*) FROM KhachHang"
+                total_count = db.fetch_one(query_total)[0]
+
+                # 2. Đếm khách VIP
+                query_vip = "SELECT COUNT(*) FROM KhachHang WHERE hang_thanh_vien = 'VIP'"
+                vip_count = db.fetch_one(query_vip)[0]
+
+                # 3. Đếm khách Bạc
+                query_silver = "SELECT COUNT(*) FROM KhachHang WHERE hang_thanh_vien = 'Bạc'"
+                silver_count = db.fetch_one(query_silver)[0]
+
+                # Trả về một dictionary
+                return {
+                    "total": total_count or 0,
+                    "vip": vip_count or 0,
+                    "silver": silver_count or 0
+                }
+
+            except mysql.connector.Error as err:
+                print(f"Lỗi khi lấy số liệu thống kê khách hàng: {err}")
+                return {"total": 0, "vip": 0, "silver": 0}
+            finally:
+                if db:
+                    db.close()

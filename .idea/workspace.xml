@@ -4,11 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8747d704-f226-4f97-a3e3-89b0df8fe83b" name="Changes" comment="&quot;thêm xóa sửa tx&quot;">
+    <list default="true" id="8747d704-f226-4f97-a3e3-89b0df8fe83b" name="Changes" comment="&quot;cập nhật thêm xóa sửa khách hàng&quot;">
+      <change afterPath="$PROJECT_DIR$/src/gui/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/gui/trip_page.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/models/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/models/trip_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/vehicle_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/vehicle_page.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/db_connect.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/db_connect.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/vehicle_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/vehicle_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/database/db.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/db.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Login.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/Login.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/customer_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/customer_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/main_window.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/customer_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/customer_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/dashbroad_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/dashbroad_model.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,8 +77,12 @@
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Python\DoAn\src\database" />
     </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Python\DoAn\src" />
+      <recent name="D:\Python\DoAn" />
+    </key>
   </component>
-  <component name="RunManager" selected="Python.Login (1)">
+  <component name="RunManager" selected="Python.main">
     <configuration name="Login (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="DoAn" />
       <option name="ENV_FILES" value="" />
@@ -107,28 +119,6 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="D:\Python\DoAn\src\gui\Login.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="dashbroad_model" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="DoAn" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/models" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/models/dashbroad_model.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -181,6 +171,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="DoAn" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="D:\Python\DoAn\src\main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="main_window" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="DoAn" />
       <option name="ENV_FILES" value="" />
@@ -205,11 +217,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.main" />
         <item itemvalue="Python.Login (1)" />
         <item itemvalue="Python.db_connect" />
         <item itemvalue="Python.main_window" />
         <item itemvalue="Python.database_connector" />
-        <item itemvalue="Python.dashbroad_model" />
       </list>
     </recent_temporary>
   </component>
@@ -460,7 +472,47 @@
       <option name="project" value="LOCAL" />
       <updated>1763012433541</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="&quot;t&quot;">
+      <option name="closed" value="true" />
+      <created>1763018808386</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1763018808386</updated>
+    </task>
+    <task id="LOCAL-00031" summary="&quot;sửa&quot;">
+      <option name="closed" value="true" />
+      <created>1763018833683</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1763018833683</updated>
+    </task>
+    <task id="LOCAL-00032" summary="&quot;sửaa&quot;">
+      <option name="closed" value="true" />
+      <created>1763018845788</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1763018845788</updated>
+    </task>
+    <task id="LOCAL-00033" summary="&quot;sửaa&quot;">
+      <option name="closed" value="true" />
+      <created>1763018857200</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1763018857200</updated>
+    </task>
+    <task id="LOCAL-00034" summary="&quot;cập nhật thêm xóa sửa khách hàng&quot;">
+      <option name="closed" value="true" />
+      <created>1763175932648</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1763175932648</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -505,6 +557,10 @@
     <MESSAGE value="&quot;thêm xóa sửa&quot;" />
     <MESSAGE value="&quot;thêm xóa sửa xe&quot;" />
     <MESSAGE value="&quot;thêm xóa sửa tx&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="&quot;thêm xóa sửa tx&quot;" />
+    <MESSAGE value="&quot;t&quot;" />
+    <MESSAGE value="&quot;sửa&quot;" />
+    <MESSAGE value="&quot;sửaa&quot;" />
+    <MESSAGE value="&quot;cập nhật thêm xóa sửa khách hàng&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="&quot;cập nhật thêm xóa sửa khách hàng&quot;" />
   </component>
 </project>
