@@ -185,26 +185,44 @@ class VehicleModel:
             if db:
                 db.close()
 
+        # (Đây là code để bạn thay thế trong file models/vehicle_model.py)
+
     def get_vehicle_by_id(self, vehicle_id):
-        """Lấy toàn bộ dữ liệu của 1 xe bằng ID (dạng dictionary)."""
-        db = None
-        try:
-            db = Database()
-            query = "SELECT * FROM PhuongTien WHERE id_phuong_tien = %s"
-            # Lấy tên cột
-            db.execute_query(query, (vehicle_id,))
-            result = db.cursor.fetchone()
-            if result:
-                # Chuyển (tuple) thành {dict}
-                column_names = [desc[0] for desc in db.cursor.description]
-                return dict(zip(column_names, result))
-            return None
-        except mysql.connector.Error as err:
-            print(f"Lỗi khi lấy xe theo ID: {err}")
-            return None
-        finally:
-            if db:
-                db.close()
+            """
+            Lấy toàn bộ dữ liệu của 1 xe bằng ID (dạng dictionary).
+            SỬA LẠI: Hàm này tự quản lý cursor để sửa lỗi AttributeError.
+            """
+            db = None  # Đây là đối tượng Database (quản lý kết nối)
+            cursor = None  # Đây là con trỏ (cursor) thô
+            try:
+                db = Database()  # Tạo kết nối
+                if not db.conn:
+                    print("Lỗi: Không thể kết nối CSDL trong get_vehicle_by_id")
+                    return None
+
+                cursor = db.conn.cursor()  # Lấy một con trỏ (cursor) mới từ kết nối
+
+                query = "SELECT * FROM PhuongTien WHERE id_phuong_tien = %s"
+                cursor.execute(query, (vehicle_id,))
+                result_tuple = cursor.fetchone()  # Lấy 1 dòng kết quả (dạng tuple)
+
+                if result_tuple:
+                    # Lấy tên các cột
+                    column_names = [desc[0] for desc in cursor.description]
+                    # Ghép tên cột và dữ liệu lại thành dictionary
+                    return dict(zip(column_names, result_tuple))
+
+                return None  # Nếu không tìm thấy
+
+            except mysql.connector.Error as err:
+                print(f"Lỗi khi lấy xe theo ID: {err}")
+                return None
+            finally:
+                # Dọn dẹp
+                if cursor:
+                    cursor.close()  # Luôn đóng cursor
+                if db:
+                    db.close()  # Luôn đóng kết nối
 
     def update_vehicle_by_id(self, vehicle_id, data):
         """Cập nhật xe dựa trên ID."""

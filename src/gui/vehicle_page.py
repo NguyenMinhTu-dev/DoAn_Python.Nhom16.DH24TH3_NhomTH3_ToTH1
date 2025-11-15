@@ -513,7 +513,7 @@ class EditVehicleModal(tk.Toplevel):
 
         # Biển số xe (Không cho sửa, vì là khóa chính)
         ttk.Label(container, text="Biển số xe:").grid(row=1, column=0, sticky="w", padx=(0, 10))
-        self.plate_entry = ttk.Entry(container, width=22, state="disabled")
+        self.plate_entry = ttk.Entry(container, width=22, state="normal")
         self.plate_entry.grid(row=2, column=0, sticky="ew", padx=(0, 10), pady=2)
         self.plate_entry.insert(0, vehicle_data['bien_so_xe'])
 
@@ -610,8 +610,15 @@ class EditVehicleModal(tk.Toplevel):
             driver_name_full = self.driver_combo.get().strip()
             driver_code = self.driver_map_reversed.get(driver_name_full, None)
 
+            # === SỬA LỖI MẤT BIỂN SỐ ===
+            # Lấy biển số từ dữ liệu gốc (self.vehicle_data)
+            # thay vì từ ô entry (vì ô đó bị 'disabled')
+            #plate = self.vehicle_data['bien_so_xe']
+            plate = self.plate_entry.get().strip().upper()
+            # ==========================
+
             data = {
-                'plate': self.plate_entry.get().strip().upper(),
+                'plate': plate,  # <-- Bây giờ đã đúng
                 'type': self.type_entry.get().strip(),
                 'mileage': int(self.mileage_entry.get()),
                 'last_maintenance': self.maintenance_entry.get_date().strftime("%Y-%m-%d"),
