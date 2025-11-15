@@ -4,16 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8747d704-f226-4f97-a3e3-89b0df8fe83b" name="Changes" comment="&quot;update&quot;">
+    <list default="true" id="8747d704-f226-4f97-a3e3-89b0df8fe83b" name="Changes" comment="&quot;update3&quot;">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/customer_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/customer_page.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/driver_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/driver_page.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/trip_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/trip_page.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/gui/vehicle_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/vehicle_page.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/customer_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/customer_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/driver_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/driver_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/trip_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/trip_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/vehicle_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/vehicle_model.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -517,7 +512,23 @@
       <option name="project" value="LOCAL" />
       <updated>1763183008731</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="&quot;update2&quot;">
+      <option name="closed" value="true" />
+      <created>1763184292097</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1763184292097</updated>
+    </task>
+    <task id="LOCAL-00037" summary="&quot;update3&quot;">
+      <option name="closed" value="true" />
+      <created>1763184607606</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1763184607606</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -566,6 +577,8 @@
     <MESSAGE value="&quot;sửaa&quot;" />
     <MESSAGE value="&quot;cập nhật thêm xóa sửa khách hàng&quot;" />
     <MESSAGE value="&quot;update&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="&quot;update&quot;" />
+    <MESSAGE value="&quot;update2&quot;" />
+    <MESSAGE value="&quot;update3&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="&quot;update3&quot;" />
   </component>
 </project>

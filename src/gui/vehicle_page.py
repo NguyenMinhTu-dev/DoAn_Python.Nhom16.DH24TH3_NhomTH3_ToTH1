@@ -45,7 +45,7 @@ class VehiclePage(ttk.Frame):
                   style="secondary.TLabel").pack(anchor="w")
 
         add_button = ttk.Button(title_frame, text="Thêm Xe Mới",
-                                bootstyle="success",
+                                style="Primary.TButton",
                                 command=self.open_add_vehicle_modal)
 
         add_button.pack(side="right", anchor="ne", pady=10)
