@@ -74,7 +74,7 @@ def check_login():
 card_frame = ttk.Frame(app, padding=40)
 card_frame.place(relx=0.5, rely=0.5, anchor=CENTER)
 
-ttk.Label(card_frame, text="XANH SM", font=("Arial", 28, "bold"), foreground=COLOR_PRIMARY).pack(pady=(20, 10))
+ttk.Label(card_frame, text="Đăng Nhập", font=("Arial", 28, "bold"), foreground=COLOR_PRIMARY).pack(pady=(20, 10))
 ttk.Label(card_frame, text="Đăng nhập để tiếp tục", font=("Arial", 11), foreground=COLOR_SUBTEXT).pack(pady=(0, 30))
 
 ttk.Label(card_frame, text="TÀI KHOẢN", font=("Arial", 10, "bold"), foreground=COLOR_SUBTEXT).pack(anchor='w', padx=10)
