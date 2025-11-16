@@ -38,7 +38,7 @@ class DashbroadPage(ttk.Frame):
         card1 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card1.pack(side="left", fill="x", expand=True, padx=(0, 10))
         ttk.Label(card1, text="Tổng Doanh Thu", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
-        ttk.Label(card1, text="123.456.789 đ", font=("Arial", 22, "bold"), style="light.TLabel").pack(anchor="w",
+        ttk.Label(card1, text="705.000 đ", font=("Arial", 22, "bold"), style="light.TLabel").pack(anchor="w",
                                                                                                       pady=5)
         ttk.Label(card1, text="+20.1% so với tháng trước", bootstyle="success").pack(anchor="w")
 
@@ -46,15 +46,15 @@ class DashbroadPage(ttk.Frame):
         card2 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card2.pack(side="left", fill="x", expand=True, padx=10)
         ttk.Label(card2, text="Tổng Số Khách Hàng", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
-        ttk.Label(card2, text="1.234", font=("Arial", 22, "bold"), style="light.TLabel").pack(anchor="w", pady=5)
-        ttk.Label(card2, text="+160 khách hàng mới", bootstyle="info").pack(anchor="w")
+        ttk.Label(card2, text="9", font=("Arial", 22, "bold"), style="light.TLabel").pack(anchor="w", pady=5)
+        ttk.Label(card2, text="+3 khách hàng mới", bootstyle="info").pack(anchor="w")
 
         # Thẻ 3: Tài Xế
         card3 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card3.pack(side="left", fill="x", expand=True, padx=(10, 0))
         ttk.Label(card3, text="Tổng Số Tài Xế", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
-        ttk.Label(card3, text="573", font=("Arial", 22, "bold"), style="light.TLabel").pack(anchor="w", pady=5)
-        ttk.Label(card3, text="+24 tài xế mới", bootstyle="info").pack(anchor="w")
+        ttk.Label(card3, text="7", font=("Arial", 22, "bold"), style="light.TLabel").pack(anchor="w", pady=5)
+        ttk.Label(card3, text="+2 tài xế mới", bootstyle="info").pack(anchor="w")
 
         # --- 3. Hàng 2: Biểu đồ và Danh sách ---
         bottom_frame = ttk.Frame(self, style="TFrame")

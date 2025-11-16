@@ -1,0 +1,29 @@
+========================================
+    HÓA ĐƠN CHI TIẾT CHUYẾN XE #9
+========================================
+Trạng thái: Hoàn thành
+
+--- Thông Tin Khách Hàng ---
+Tên: Đàm Vĩnh Phúc An
+SĐT: 0944556677
+
+--- Thông Tin Tài Xế ---
+Tên: Phạm Hùng Dũng
+SĐT: 0934567890
+Biển số xe: 51G-456.78
+
+--- Chi Tiết Chuyến Đi ---
+Điểm đón: Bến xe Miền Đông mới
+Điểm đến: Chung cư Vinhomes
+Quãng đường: 12.00 km
+
+--- Thời Gian ---
+Thời gian đặt: 2025-11-14 16:00:00
+Thời gian kết thúc: 2025-11-14 16:40:00
+
+--- Thanh Toán ---
+Phương thức: Tiền mặt
+Đánh giá: 3 sao
+........................................
+TỔNG TIỀN: 160,000 VND
+========================================
