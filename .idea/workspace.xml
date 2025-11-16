@@ -4,11 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8747d704-f226-4f97-a3e3-89b0df8fe83b" name="Changes" comment="&quot;sửa&quot;">
+    <list default="true" id="8747d704-f226-4f97-a3e3-89b0df8fe83b" name="Changes" comment="&quot;full&quot;">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/gui/vehicle_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/vehicle_page.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/db_connect.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/db_connect.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/vehicle_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/vehicle_model.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -544,7 +541,23 @@
       <option name="project" value="LOCAL" />
       <updated>1763186841243</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="&quot;full&quot;">
+      <option name="closed" value="true" />
+      <created>1763188312065</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1763188312065</updated>
+    </task>
+    <task id="LOCAL-00041" summary="&quot;full&quot;">
+      <option name="closed" value="true" />
+      <created>1763277594562</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1763277594562</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -571,7 +584,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="&quot;sửa lỗi&quot;" />
     <MESSAGE value=" ui" />
     <MESSAGE value="QLXEVALAIXE" />
     <MESSAGE value="update" />
@@ -596,6 +608,7 @@
     <MESSAGE value="&quot;update3&quot;" />
     <MESSAGE value="&quot;update4&quot;" />
     <MESSAGE value="&quot;sửa&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="&quot;sửa&quot;" />
+    <MESSAGE value="&quot;full&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="&quot;full&quot;" />
   </component>
 </project>

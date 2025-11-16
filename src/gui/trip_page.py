@@ -5,7 +5,7 @@ from tkinter import messagebox
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.style import Style
-
+from tkinter import messagebox, filedialog
 # === IMPORT MODEL ===
 try:
     from models.trip_model import TripModel
@@ -333,12 +333,14 @@ class TripPage(ttk.Frame):
 
 # (Các lớp ViewTripModal giữ nguyên)
 # (Vui lòng giữ nguyên code của class này)
+# (Các lớp ViewTripModal giữ nguyên)
+# (Vui lòng giữ nguyên code của class này)
 class ViewTripModal(tk.Toplevel):
     def __init__(self, parent, details_tuple):
         super().__init__(parent)
 
-        # Chuyển tuple sang dict cho dễ đọc code
-        details = {
+        # SỬA ĐỔI: Chuyển sang self.details để các hàm khác có thể truy cập
+        self.details = {
             "id_chuyen_xe": details_tuple[0], "id_khach_hang": details_tuple[1],
             "ma_tai_xe": details_tuple[2], "bien_so_xe": details_tuple[3],
             "diem_don": details_tuple[4], "diem_den": details_tuple[5],
@@ -350,7 +352,7 @@ class ViewTripModal(tk.Toplevel):
             "sdt_tai_xe": details_tuple[16],
         }
 
-        self.title(f"Chi Tiết Chuyến Xe #{details['id_chuyen_xe']}")
+        self.title(f"Chi Tiết Chuyến Xe #{self.details['id_chuyen_xe']}")  # SỬA ĐỔI: Dùng self.details
         self.transient(parent)
         self.grab_set()
         self.resizable(False, False)
@@ -361,10 +363,10 @@ class ViewTripModal(tk.Toplevel):
         header_frame = ttk.Frame(main_frame, style='light')
         header_frame.pack(fill="x")
 
-        ttk.Label(header_frame, text=f"Chi Tiết Chuyến Xe #{details['id_chuyen_xe']}", font=("Arial", 16, "bold"),
-                  foreground=COLOR_PRIMARY_TEAL).pack(anchor="w")
+        ttk.Label(header_frame, text=f"Chi Tiết Chuyến Xe #{self.details['id_chuyen_xe']}", font=("Arial", 16, "bold"),
+                  foreground=COLOR_PRIMARY_TEAL).pack(anchor="w")  # SỬA ĐỔI: Dùng self.details
 
-        status = details['trang_thai_chuyen_xe']
+        status = self.details['trang_thai_chuyen_xe']  # SỬA ĐỔI: Dùng self.details
         if status == "Hoàn thành":
             style = "success"
         elif status == "Đang diễn ra":
@@ -376,11 +378,15 @@ class ViewTripModal(tk.Toplevel):
 
         ttk.Label(header_frame, text=f"Trạng thái: {status}", bootstyle=style).pack(anchor="w", pady=(0, 20))
 
-        self.create_details_widgets(main_frame, details)
+        self.create_details_widgets(main_frame, self.details)  # SỬA ĐỔI: Dùng self.details
 
         button_frame = ttk.Frame(main_frame, style='light')
         button_frame.pack(fill="x", pady=(20, 0))
+
+        # SỬA ĐỔI: Thêm nút Lưu và sắp xếp lại
         ttk.Button(button_frame, text="Đóng", command=self.destroy, bootstyle="secondary-outline").pack(side="right")
+        ttk.Button(button_frame, text="Lưu Hóa Đơn", command=self.save_to_txt, bootstyle="info").pack(side="right",
+                                                                                                     padx=(0, 10))
 
     def create_details_widgets(self, parent, details):
         form_frame = ttk.Frame(parent, style='light')
@@ -421,3 +427,68 @@ class ViewTripModal(tk.Toplevel):
                                                                                                                       10))
         create_detail_entry("Thời Gian Đặt:", details['thoi_gian_dat_xe'], 10, 0)
         create_detail_entry("Thời Gian Kết Thúc:", details['thoi_gian_ket_thuc'] or "Chưa kết thúc", 10, 2)
+
+    # --- SỬA ĐỔI: HÀM MỚI ĐỂ LƯU FILE TXT ---
+    def save_to_txt(self):
+        """Lưu chi tiết hóa đơn ra file .txt"""
+
+        # 1. Đề xuất tên file
+        default_filename = f"HoaDon_ChuyenXe_{self.details['id_chuyen_xe']}.txt"
+
+
+        file_path = filedialog.asksaveasfilename(
+            parent=self,
+            title="Lưu Hóa Đơn",
+            initialfile=default_filename,
+            defaultextension=".txt",
+            filetypes=(("Text files", "*.txt"), ("All files", "*.*"))
+        )
+
+
+        if not file_path:
+            return
+
+        # 4. Tạo nội dung file
+        try:
+            content = []
+            content.append("=" * 40)
+            content.append(f"    HÓA ĐƠN CHI TIẾT CHUYẾN XE #{self.details['id_chuyen_xe']}")
+            content.append("=" * 40)
+            content.append(f"Trạng thái: {self.details['trang_thai_chuyen_xe']}\n")
+
+            content.append(f"--- Thông Tin Khách Hàng ---")
+            content.append(f"Tên: {self.details['ten_khach_hang']}")
+            content.append(f"SĐT: {self.details['sdt_khach_hang']}\n")
+
+            content.append(f"--- Thông Tin Tài Xế ---")
+            content.append(f"Tên: {self.details['ten_tai_xe']}")
+            content.append(f"SĐT: {self.details['sdt_tai_xe']}")
+            content.append(f"Biển số xe: {self.details['bien_so_xe']}\n")
+
+            content.append(f"--- Chi Tiết Chuyến Đi ---")
+            content.append(f"Điểm đón: {self.details['diem_don']}")
+            content.append(f"Điểm đến: {self.details['diem_den']}")
+            content.append(f"Quãng đường: {self.details['so_km']} km\n")
+
+            content.append(f"--- Thời Gian ---")
+            content.append(f"Thời gian đặt: {self.details['thoi_gian_dat_xe']}")
+            content.append(f"Thời gian kết thúc: {self.details['thoi_gian_ket_thuc'] or 'Chưa kết thúc'}\n")
+
+            content.append(f"--- Thanh Toán ---")
+            content.append(f"Phương thức: {self.details['phuong_thuc_thanh_toan']}")
+            content.append(f"Đánh giá: {self.details['danh_gia_chuyen_xe']} sao" if self.details[
+                'danh_gia_chuyen_xe'] else "Chưa đánh giá")
+            content.append("." * 40)
+            content.append(f"TỔNG TIỀN: {self.details['tong_tien']:,.0f} VND")
+            content.append("=" * 40)
+
+            final_content = "\n".join(content)
+
+
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(final_content)
+
+            messagebox.showinfo("Thành công", f"Đã lưu hóa đơn thành công!\n{file_path}", parent=self)
+
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Không thể lưu file: {e}", parent=self)
