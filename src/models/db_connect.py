@@ -4,7 +4,7 @@ import hashlib
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': '11022005_tU',
+    'password': '11022005',
     'database': 'QLXEVALAIXE'
 }
 

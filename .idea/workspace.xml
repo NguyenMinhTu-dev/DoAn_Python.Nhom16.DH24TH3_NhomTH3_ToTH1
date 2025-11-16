@@ -4,8 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8747d704-f226-4f97-a3e3-89b0df8fe83b" name="Changes" comment="&quot;full&quot;">
+    <list default="true" id="8747d704-f226-4f97-a3e3-89b0df8fe83b" name="Changes" comment="&quot;add&quot;">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/database/db.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/db.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/gui/dashbroad.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/gui/dashbroad.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/dashbroad_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/dashbroad_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/db_connect.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/db_connect.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -557,7 +561,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763277594562</updated>
     </task>
-    <option name="localTasksCounter" value="42" />
+    <task id="LOCAL-00042" summary="&quot;add&quot;">
+      <option name="closed" value="true" />
+      <created>1763278038045</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1763278038045</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -595,7 +607,6 @@
     <MESSAGE value="&quot;chuc nang ql xe&quot;" />
     <MESSAGE value="&quot;sua giao dien&quot;" />
     <MESSAGE value="&quot;chuc năng ql tai xe&quot;" />
-    <MESSAGE value="&quot;add&quot;" />
     <MESSAGE value="&quot;thêm xóa&quot;" />
     <MESSAGE value="&quot;thêm xóa sửa&quot;" />
     <MESSAGE value="&quot;thêm xóa sửa xe&quot;" />
@@ -609,6 +620,7 @@
     <MESSAGE value="&quot;update4&quot;" />
     <MESSAGE value="&quot;sửa&quot;" />
     <MESSAGE value="&quot;full&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="&quot;full&quot;" />
+    <MESSAGE value="&quot;add&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="&quot;add&quot;" />
   </component>
 </project>
