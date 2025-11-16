@@ -50,7 +50,6 @@ class VehiclePage(ttk.Frame):
 
         add_button.pack(side="right", anchor="ne", pady=10)
 
-        # --- 2. Hàng Thống Kê (SỬA ĐỔI) ---
         stat_frame = ttk.Frame(self, style="TFrame")
         stat_frame.pack(fill="x", expand=True, pady=10)
 
@@ -58,7 +57,7 @@ class VehiclePage(ttk.Frame):
         card1 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card1.pack(side="left", fill="x", expand=True, padx=(0, 10))
         ttk.Label(card1, text="Tổng Số Phương Tiện", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
-        # SỬA: Gán self, bỏ màu
+
         self.total_label = ttk.Label(card1, text="Đang tải...", font=("Arial", 22, "bold"),
                                      style="light.TLabel")
         self.total_label.pack(anchor="w", pady=5)
@@ -69,7 +68,7 @@ class VehiclePage(ttk.Frame):
         card2 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card2.pack(side="left", fill="x", expand=True, padx=10)
         ttk.Label(card2, text="Đang Hoạt Động", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
-        # SỬA: Gán self, bỏ màu
+
         self.active_label = ttk.Label(card2, text="Đang tải...", font=("Arial", 22, "bold"),
                                       style="light.TLabel")
         self.active_label.pack(anchor="w", pady=5)
@@ -80,7 +79,7 @@ class VehiclePage(ttk.Frame):
         card3 = ttk.Frame(stat_frame, bootstyle="light", padding=20)
         card3.pack(side="left", fill="x", expand=True, padx=(10, 0))
         ttk.Label(card3, text="Đang Bảo Trì", font=("Arial", 12), style="light.TLabel").pack(anchor="w")
-        # SỬA: Gán self, bỏ màu
+
         self.maintenance_label = ttk.Label(card3, text="Đang tải...", font=("Arial", 22, "bold"),
                                            style="light.TLabel")
         self.maintenance_label.pack(anchor="w", pady=5)
@@ -131,13 +130,12 @@ class VehiclePage(ttk.Frame):
         self.search_entry.bind("<FocusIn>", self.on_search_focus_in)
         self.search_entry.bind("<FocusOut>", self.on_search_focus_out)
         self.search_entry.bind("<KeyRelease>", self.perform_filter_and_search)
-        # --- Kết thúc sửa ---
+
 
         # --- 5. Bảng Dữ Liệu (Treeview) ---
         table_container = ttk.Frame(self, style="TFrame")
         table_container.pack(fill="both", expand=True, pady=10)
 
-        # (Giữ nguyên code định nghĩa cột, treeview, scrollbar...)
         columns = ("id_vehicle", "plate", "type", "mileage", "last_maintenance", "status", "driver_name")
         self.tree = ttk.Treeview(table_container, columns=columns, show='tree headings', height=15)
         self.tree.heading("#0", text=" ")
@@ -166,18 +164,16 @@ class VehiclePage(ttk.Frame):
         self.tree.bind("<<TreeviewSelect>>", self.on_tree_select)
         self.bind("<Button-1>", self.deselect_tree)
         action_bar.bind("<Button-1>", self.deselect_tree)
-        # --- Kết thúc Treeview ---
 
-        # --- 7. Phân trang (Pagination) ---
+
         pagination_frame = ttk.Frame(self, style="TFrame")
         pagination_frame.pack(fill="x", pady=(10, 0))
         self.pagination_label = ttk.Label(pagination_frame, text="Đang tải...", style="secondary.TLabel")
         self.pagination_label.pack(side="left")
 
-        # --- 6. Tải dữ liệu lần đầu ---
-        self.refresh_data()  # SỬA: Gọi hàm refresh_data()
 
-    # === HÀM MỚI: Xử lý Placeholder cho ô tìm kiếm ===
+        self.refresh_data()
+
     def on_search_focus_in(self, event):
         if self.search_entry.get() == self.search_placeholder:
             self.search_entry.delete(0, "end")
@@ -188,7 +184,6 @@ class VehiclePage(ttk.Frame):
             self.search_entry.insert(0, self.search_placeholder)
             self.search_entry.config(foreground="gray")
 
-    # === HÀM MỚI: Hàm tổng hợp tìm kiếm và lọc ===
     def perform_filter_and_search(self, event=None):
         search_term = self.search_entry.get()
         if search_term == self.search_placeholder:
@@ -205,19 +200,16 @@ class VehiclePage(ttk.Frame):
 
         self.load_data_into_tree(filter_status=filter_status, search_term=search_term)
 
-    # === HÀM MỚI: Tải số liệu thống kê ===
     def load_stats(self):
         if not self.db_model:
             return
         try:
-            # 1. Gọi model (Giả định model có hàm get_vehicle_stats())
             stats = self.db_model.get_vehicle_stats()
 
             total = stats.get('total', 0)
             active = stats.get('active', 0)
             maintenance = stats.get('maintenance', 0)
 
-            # 2. Cập nhật các Label chính
             self.total_label.config(text=f"{total:,.0f}")
             self.active_label.config(text=f"{active:,.0f}")
             self.maintenance_label.config(text=f"{maintenance:,.0f}")
@@ -235,8 +227,6 @@ class VehiclePage(ttk.Frame):
             self.total_label.config(text="Lỗi")
             self.active_label.config(text="Lỗi")
             self.maintenance_label.config(text="Lỗi")
-
-    # === HÀM MỚI: Dùng để làm mới từ bên ngoài ===
     def refresh_data(self):
         """
         Hàm public mà file app.py chính sẽ gọi mỗi khi trang này được hiển thị.
@@ -350,7 +340,6 @@ class VehiclePage(ttk.Frame):
             self.tree.insert("", "end", text="", values=data_values, tags=(status_tag,))
             count += 1
 
-        # SỬA: Sửa lỗi pagination
         self.pagination_label.config(text=f"Hiển thị {count} trong {count} kết quả.")
 
     def on_tree_select(self, event):
@@ -367,10 +356,6 @@ class VehiclePage(ttk.Frame):
                 self.tree.selection_set()
 
     # === FORM THÊM/SỬA XE ===
-
-
-# (Các lớp AddVehicleModal và EditVehicleModal giữ nguyên)
-# (Vui lòng giữ nguyên code của 2 class này)
 class AddVehicleModal(tk.Toplevel):
     def __init__(self, parent, db_model, callback=None):
         super().__init__(parent)
@@ -440,7 +425,6 @@ class AddVehicleModal(tk.Toplevel):
     def load_driver_names(self):
         """Load danh sách tài xế (chỉ những người đang Hoạt động và CHƯA có xe)"""
         try:
-            # Sửa: Cần hàm get_available_drivers()
             drivers = self.db_model.get_available_drivers()
             names = [f"{driver[0]} - {driver[1]}" for driver in drivers]  # "TX001 - Nguyễn Văn An"
             self.driver_combo['values'] = ["Không gán"] + names  # Thêm tùy chọn không gán
@@ -567,33 +551,24 @@ class EditVehicleModal(tk.Toplevel):
         container.columnconfigure(1, weight=1)
 
     def load_driver_names_for_edit(self):
-        """
-        Tải danh sách tài xế, BAO GỒM cả tài xế hiện tại của xe này.
-        """
         try:
-            # Lấy tất cả tài xế chưa có xe
             available_drivers = self.db_model.get_available_drivers()
-            # { "TX001": "TX001 - Nguyễn Văn An", ...}
             self.driver_map = {d[0]: f"{d[0]} - {d[1]}" for d in available_drivers}
-
-            # Lấy thông tin tài xế hiện tại (nếu có)
             current_driver_name = "Không gán"
             if self.current_driver_code:
-                # Kiểm tra xem tài xế hiện tại có trong ds có sẵn ko
                 if self.current_driver_code not in self.driver_map:
-                    # Nếu không, lấy thông tin của tài xế đó
-                    driver_info = self.db_model.get_driver_info(self.current_driver_code)  # Cần hàm này
+                    driver_info = self.db_model.get_driver_info(self.current_driver_code)
                     if driver_info:
                         self.driver_map[driver_info[0]] = f"{driver_info[0]} - {driver_info[1]}"
 
                 current_driver_name = self.driver_map.get(self.current_driver_code, "Không gán")
 
-            # Nạp vào combobox
+
             driver_list = ["Không gán"] + list(self.driver_map.values())
             self.driver_combo['values'] = driver_list
             self.driver_combo.set(current_driver_name)
 
-            # Đảo ngược map để lưu: { "TX001 - Nguyễn Văn An": "TX001" }
+
             self.driver_map_reversed = {v: k for k, v in self.driver_map.items()}
             self.driver_map_reversed["Không gán"] = None
 
@@ -610,15 +585,11 @@ class EditVehicleModal(tk.Toplevel):
             driver_name_full = self.driver_combo.get().strip()
             driver_code = self.driver_map_reversed.get(driver_name_full, None)
 
-            # === SỬA LỖI MẤT BIỂN SỐ ===
-            # Lấy biển số từ dữ liệu gốc (self.vehicle_data)
-            # thay vì từ ô entry (vì ô đó bị 'disabled')
-            #plate = self.vehicle_data['bien_so_xe']
             plate = self.plate_entry.get().strip().upper()
             # ==========================
 
             data = {
-                'plate': plate,  # <-- Bây giờ đã đúng
+                'plate': plate,
                 'type': self.type_entry.get().strip(),
                 'mileage': int(self.mileage_entry.get()),
                 'last_maintenance': self.maintenance_entry.get_date().strftime("%Y-%m-%d"),
